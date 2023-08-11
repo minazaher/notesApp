@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Notey</string>
+    <string name="my_notes">My Notes</string>
+    <string name="search_notes">Search Notes</string>
+    <string name="date_time">2023-08-04 07:24:34</string>
+    <string name="miscellaneous">Miscellaneous</string>
+    <string name="pick_color">Pick Color</string>
+    <string name="add_image">Add Image</string>
+</resources>
