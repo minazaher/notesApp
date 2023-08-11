@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -24,6 +25,7 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
@@ -55,7 +57,7 @@ public class CreateNoteActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_STORAGE_PERMISSION = 1;
 
     ActivityResultLauncher<String> selectPhoto;
-    private ActivityResultLauncher<Intent> selectImageLauncher;
+    private ActivityResultLauncher<String> selectImageLauncher;
     private Bitmap imgToStore;
     String Filepath;
     private String selectedNoteColor;
@@ -69,32 +71,14 @@ public class CreateNoteActivity extends AppCompatActivity {
         setContentView(createNoteBinding.getRoot());
         selectedNoteColor = "#333333";
 
-
-        ActivityResultContract<String, Uri> openDocumentContract = new ActivityResultContract<String, Uri>() {
-            @NonNull
+        selectPhoto = registerForActivityResult(new ActivityResultContracts.GetContent(),
+                new ActivityResultCallback<Uri>() {
             @Override
-            public Intent createIntent(@NonNull Context context, String input) {
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType(input);
-                return intent;
+            public void onActivityResult(Uri result) {
+                createNoteBinding.imageNote.setImageURI(result);
+               selectedImagePath = getPathFromUri(result);
             }
-
-            @Override
-            public Uri parseResult(int resultCode, @Nullable Intent intent) {
-                if (resultCode == Activity.RESULT_OK && intent != null) {
-                    selectedImagePath = intent.getData().toString();
-                    createNoteBinding.imageNote.setImageURI(intent.getData());
-                    return intent.getData();
-                }
-                return null;
-            }
-        };
-//        selectPhoto = registerForActivityResult(new ActivityResultContracts.GetContent()
-//                , result -> {
-//                    createNoteBinding.imageNote.setImageURI(result);
-//                    selectedImagePath = result.toString();
-//                });
+        });
 
         createNoteBinding.imageBack.setOnClickListener(view -> onBackPressed());
 
@@ -114,15 +98,6 @@ public class CreateNoteActivity extends AppCompatActivity {
         });
     }
 
-    public static void loadImageFromStorage(String path, ImageView view, String name) {
-        try {
-            File f = new File(path, name);
-            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-            view.setImageBitmap(b);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
 
     private String getNoteStatus(){
         noteTitle = createNoteBinding.etNoteTitle.getText().toString();
@@ -173,8 +148,6 @@ public class CreateNoteActivity extends AppCompatActivity {
     }
 
     private void selectImage(){
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
         selectPhoto.launch("image/*");
 
     }
@@ -197,9 +170,8 @@ public class CreateNoteActivity extends AppCompatActivity {
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 selectImage();
             else{
-
-            }
                 Toast.makeText(this, "Permission Denied!", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -221,48 +193,52 @@ public class CreateNoteActivity extends AppCompatActivity {
                 setSubtitleIndicatorColor();
             });
         }
-
     }
+
 
     private void setSubtitleIndicatorColor(){
         GradientDrawable gradientDrawable = (GradientDrawable) createNoteBinding.viewSubtitleIndicator.getBackground();
         gradientDrawable.setColor(Color.parseColor(selectedNoteColor));
     }
 
-//    private String getPathFromUr(Uri imageUri){
-//        String filePath;
-//        Cursor cursor = getContentResolver().query(imageUri,null,null, null);
-//        if (cursor == null){
-//            filePath = imageUri.getPath();
-//        }
-//        else {
-//            cursor.moveToFirst();
-//            int index = cursor.getColumnIndex("_data");
-//            filePath = cursor.getString(index);
-//            cursor.close();
-//        }
-//        return filePath;
-//    }
+
+    private String getPathFromUri(Uri uri) {
+        String filepath;
+        if (DocumentsContract.isDocumentUri(this, uri)) {
+            String documentId = DocumentsContract.getDocumentId(uri);
+            String id = documentId.split(":")[1];
+            Uri mediaStoreUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, Long.parseLong(id));
+            Cursor cursor = getContentResolver().query(mediaStoreUri, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                int index = cursor.getColumnIndex("_data");
+                filepath = cursor.getString(index);
+                System.out.println("The FilePath is :" + filepath);
+                cursor.close();
+            } else {
+                throw new IllegalStateException("Cursor is null");
+            }
+        } else {
+            // Handle other types of Uri
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            if (cursor == null) {
+                filepath = uri.getPath();
+            } else {
+                cursor.moveToFirst();
+                int index = cursor.getColumnIndex("_data");
+                if (index == -1) {
+                    // Handle error: column with name "_data" does not exist in Cursor
+                    throw new IllegalArgumentException("Invalid Uri: column with name \"_data\" does not exist in Cursor");
+                } else {
+                    filepath = cursor.getString(index);
+                    System.out.println("The FilePath is :" + filepath);
+                    cursor.close();
+                }
+            }
+        }
+        return filepath;
+    }
 
 
-//    private String saveToInternalStorage(Bitmap bitmapImage, String name) {
-//        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-//        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-//        File mypath = new File(directory, name);
-//
-//        FileOutputStream fos = null;
-//        try {
-//            fos = new FileOutputStream(mypath);
-//            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            try {
-//                fos.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return directory.getAbsolutePath();
-//    }
+
 }

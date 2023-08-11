@@ -93,12 +93,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.Viewholder> 
              if (note.getImagePath() == null)
                  imageView.setVisibility(View.GONE);
              else{
-//                 ContentResolver contentResolver = context.getContentResolver();
-//                 final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-//                 contentResolver.takePersistableUriPermission(note.getImageUri(), takeFlags);
-                 Glide.with(context)
-                         .load(note.getImageUri())
-                         .into(imageView);
+                 imageView.setImageBitmap(BitmapFactory.decodeFile(note.getImagePath()));
                  imageView.setVisibility(View.VISIBLE);
              }
          }
