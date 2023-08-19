@@ -2,9 +2,9 @@
     <!-- Base application theme. -->
     <style name="Theme.NotesApp" parent="Theme.Material3.Dark.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/colorPrimary1</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark1</item>
+        <item name="colorAccent">@color/colorAccent1</item>
 
         <item name="colorPrimaryVariant">@color/purple_700</item>
         <item name="colorOnPrimary">@color/white</item>
@@ -15,5 +15,9 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimary</item>
         <!-- Customize your theme here. -->
+    </style>
+
+    <style name="ActionBarWidgetTheme" parent="@android:style/Theme.Holo">
+        <item name="android:textColorHint">@color/white</item>
     </style>
 </resources>

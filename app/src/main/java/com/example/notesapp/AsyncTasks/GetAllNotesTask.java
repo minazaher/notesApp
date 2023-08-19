@@ -24,19 +24,18 @@ public class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
     public GetAllNotesTask(Context context, Callback mCallback) {
         mContextRef = new WeakReference<>(context);
         this.mCallback  = mCallback ;
-
     }
 
     @Override
     protected List<Note> doInBackground(Void... voids) {
         Context context = mContextRef.get();
         return NotesDatabase.getInstance(context).noteDao().getALlNotes();
-
     }
 
     @Override
     protected void onPostExecute(List<Note> notes) {
         super.onPostExecute(notes);
         mCallback.onResult(notes);
+
     }
 }

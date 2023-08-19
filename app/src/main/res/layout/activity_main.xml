@@ -23,12 +23,12 @@
     <LinearLayout
         android:id="@+id/layout_search"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/_35sdp"
         android:layout_marginHorizontal="@dimen/_8sdp"
         android:layout_marginTop="@dimen/_15sdp"
         android:background="@drawable/bg_search"
         android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/_10sdp"
+        android:paddingStart="@dimen/_10sdp"
         app:layout_constraintTop_toBottomOf="@id/tv_myNotes"
         android:orientation="horizontal">
 
@@ -38,22 +38,24 @@
             android:contentDescription="@string/app_name"
             android:src="@drawable/ic_search"
             app:tint="@color/colorSearchIcon"/>
-    
-        <EditText
+
+        <SearchView
             android:id="@+id/et_search"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_35sdp"
-            android:layout_marginStart="@dimen/_13sdp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/_5sdp"
             android:background="@null"
+            android:iconifiedByDefault="false"
+            android:searchIcon="@null"
             android:fontFamily="@font/ubuntu_regular"
-            android:hint="@string/search_notes"
             android:imeOptions="actionDone"
             android:importantForAutofill="no"
             android:includeFontPadding="false"
             android:inputType="text"
-            android:textColor="@color/white"
-            android:textColorHint="@color/colorTextHint"
-            android:textSize="@dimen/_13ssp"/>
+            app:iconifiedByDefault="false"
+            android:textColorHint="@color/white"
+            android:textSize="@dimen/_13ssp" />
+
     </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/notesRecyclerView"
@@ -85,21 +87,21 @@
             android:src="@drawable/ic_add_circle_outline"
             app:tint="@color/colorIcons"/>
         <ImageView
-            android:id="@+id/image_addImage"
+            android:id="@+id/image_addChangeTheme"
             android:layout_width="@dimen/_23sdp"
             android:layout_height="@dimen/_23sdp"
             android:contentDescription="@string/app_name"
             android:layout_marginStart="@dimen/_15sdp"
-            android:src="@drawable/ic_image"
+            android:src="@drawable/ic_baseline_color_lens_24"
             app:tint="@color/colorIcons"/>
 
         <ImageView
-            android:id="@+id/image_addUrl"
+            android:id="@+id/image_backup"
             android:layout_width="@dimen/_23sdp"
             android:layout_height="@dimen/_23sdp"
             android:contentDescription="@string/app_name"
             android:layout_marginStart="@dimen/_15sdp"
-            android:src="@drawable/ic_web"
+            android:src="@drawable/ic_baseline_backup_24"
             app:tint="@color/colorIcons"/>
     </LinearLayout>
 
