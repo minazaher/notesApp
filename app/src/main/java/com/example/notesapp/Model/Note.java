@@ -5,11 +5,16 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 
-@Entity(tableName = "notes")
+@Entity(tableName = "notes" ,
+        foreignKeys = @ForeignKey(entity = Category.class,
+        parentColumns = "category_id",
+        childColumns = "category_id",
+        onDelete = ForeignKey.CASCADE))
 public class Note implements Serializable {
     @PrimaryKey(autoGenerate = true)
     private int id;
@@ -22,6 +27,9 @@ public class Note implements Serializable {
 
     @ColumnInfo
     private String subtitle;
+
+    @ColumnInfo(index = true, name = "category_id")
+    private int categoryId; // Foreign key column
 
     @ColumnInfo(name = "note_text")
     private String noteText;
@@ -82,6 +90,14 @@ public class Note implements Serializable {
     public Uri getImageUri(){
         return Uri.parse(this.imagePath);
 
+    }
+
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 
     public void setImagePath(String imagePath) {

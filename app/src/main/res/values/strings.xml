@@ -11,4 +11,14 @@
     <string name="add">Add</string>
     <string name="cancel">Cancel</string>
     <string name="delete_note">Delete Note</string>
+    <string name="select_category">Select Category</string>
+    <string name="add_category">Add Category</string>
+
+    <string-array name="notes_categories">
+        <item>Personal</item>
+        <item>Work</item>
+        <item>Learning</item>
+        <item>Health</item>
+    </string-array>
+
 </resources>

@@ -8,33 +8,32 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 <!--Light Theme-->
-    <color name="colorPrimary">#FF80AB</color>
-    <color name="colorPrimaryDark">#FF4081</color>
+    <color name="colorPrimary1">#FF80AB</color>
+    <color name="colorPrimaryDark1">#FF4081</color>
     <color name="colorAccent">#FFD54F</color>
     <color name="colorDelete">#FF0000</color>
-    <color name="colorSearchBackground">#F06292</color>
-    <color name="colorSearchIcon">#FFFFFF</color>
-    <color name="colorTextHint">#FFFFFF</color>
-    <color name="colorQuickActionsBackground">#FF4081</color>
-    <color name="colorIcons">#F5F5F5</color>
-    <color name="colorTextSubtitle">#FFFFFF</color>
-    <color name="colorNoteSubtitleText">#FFFFFF</color>
-    <color name="colorMiscBackground">#E91E63</color>
+<!--    <color name="colorSearchBackground">#F06292</color>-->
+<!--    <color name="colorSearchIcon">#FFFFFF</color>-->
+<!--    <color name="colorTextHint">#FFFFFF</color>-->
+<!--    <color name="colorQuickActionsBackground">#FF4081</color>-->
+<!--    <color name="colorIcons">#F5F5F5</color>-->
+<!--    <color name="colorTextSubtitle">#FFFFFF</color>-->
+<!--    <color name="colorNoteSubtitleText">#FFFFFF</color>-->
+<!--    <color name="colorMiscBackground">#E91E63</color>-->
 <!---->
 <!--    dark Theme-->
-    <color name="colorPrimary1">#292929</color>
-    <color name="colorPrimaryDark1">#292929</color>
+    <color name="colorPrimary">#292929</color>
+    <color name="colorPrimaryDark">#292929</color>
     <color name="colorAccent1">#FDBE3B</color>
 
-    <color name="colorSearchBackground1">#333333</color>
-    <color name="colorSearchIcon1">#DBDBDB</color>
-    <color name="colorTextHint1">#7B7B7B</color>
-    <color name="colorQuickActionsBackground1">#2f2d2e</color>
-    <color name="colorIcons1">#A4A4A4</color>
-    <color name="colorTextSubtitle1" >#CECECE</color>
-    <color name="colorDefaultNoteColor1">#333333</color>
-    <color name="colorNoteSubtitleText1">#FAFAFA</color>
-    <color name="colorMiscBackground1">#1F1F1F</color>
+    <color name="colorSearchBackground">#333333</color>
+    <color name="colorSearchIcon">#DBDBDB</color>
+    <color name="colorTextHint">#7B7B7B</color>
+    <color name="colorQuickActionsBackground">#2f2d2e</color>
+    <color name="colorIcons">#A4A4A4</color>
+    <color name="colorTextSubtitle" >#CECECE</color>
+    <color name="colorNoteSubtitleText">#FAFAFA</color>
+    <color name="colorMiscBackground">#1F1F1F</color>
     <!--    -->
     <color name="colorDefaultNoteColor">#deeae6</color>
     <color name="colorNoteColor2">#FF1D8E</color>

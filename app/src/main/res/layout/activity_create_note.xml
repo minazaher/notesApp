@@ -78,6 +78,34 @@
                 app:layout_constraintStart_toStartOf="@id/et_noteTitle"
                 app:layout_constraintTop_toBottomOf="@id/et_noteTitle" />
 
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:id="@+id/spinner_select_category"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="@dimen/_12sdp"
+                android:layout_marginTop="@dimen/_16sdp"
+                android:hint="@string/select_category"
+                app:expandedHintEnabled="true"
+                app:boxStrokeColor="@color/colorTextHint"
+                app:boxBackgroundColor="@color/colorPrimary"
+                android:textColorHint="@color/colorTextHint"
+                app:hintTextColor="@color/colorTextHint"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_dateTime"
+                app:layout_constraintBottom_toTopOf="@id/et_noteSubtitle">
+
+                <AutoCompleteTextView
+                    android:id="@+id/category_auto_complete"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:maxLines="3"
+                    android:inputType="none"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/_14ssp"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
             <EditText
                 android:id="@+id/et_noteSubtitle"
                 android:layout_width="0dp"
@@ -97,7 +125,7 @@
                 android:textSize="@dimen/_13ssp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/viewSubtitleIndicator"
-                app:layout_constraintTop_toBottomOf="@id/text_dateTime" />
+                app:layout_constraintTop_toBottomOf="@id/spinner_select_category" />
 
             <View
                 android:id="@+id/viewSubtitleIndicator"

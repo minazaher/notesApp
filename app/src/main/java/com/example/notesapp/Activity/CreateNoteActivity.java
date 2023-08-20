@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -18,6 +17,8 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,16 +33,18 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.notesapp.Database.NotesDatabase;
+import com.example.notesapp.Model.Category;
 import com.example.notesapp.Model.Note;
 import com.example.notesapp.R;
 import com.example.notesapp.databinding.ActivityCreateNoteBinding;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CreateNoteActivity extends AppCompatActivity {
     private static final String NOTE_TITLE_EMPTY = "Note title cannot be empty!";
@@ -58,10 +61,12 @@ public class CreateNoteActivity extends AppCompatActivity {
     private String selectedNoteColor;
     private String selectedImagePath;
     private String URL ="";
+    private int selectedCategory;
 
     private AlertDialog dialogAddUrl;
-
     private Note alreadyAvailableNote;
+    private AlertDialog dialogAddCategory;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,7 +103,7 @@ public class CreateNoteActivity extends AppCompatActivity {
         });
         createNoteBinding.imageDeleteWebUrl.setOnClickListener(view -> {
             createNoteBinding.textWebUrl.setText(null);
-            createNoteBinding.textWebUrl.setVisibility(View.GONE);
+            createNoteBinding.layoutWebUrl.setVisibility(View.GONE);
             alreadyAvailableNote.setNoteText(null);
         });
         createNoteBinding.imageDeleteImage.setOnClickListener(view -> {
@@ -116,6 +121,7 @@ public class CreateNoteActivity extends AppCompatActivity {
                 Toast.makeText(CreateNoteActivity.this, "Failed! Try Again Later Please", Toast.LENGTH_SHORT).show();
             }
         });
+        initializeSpinner();
 
     }
 
@@ -124,6 +130,7 @@ public class CreateNoteActivity extends AppCompatActivity {
         createNoteBinding.etNoteSubtitle.setText(alreadyAvailableNote.getSubtitle());
         createNoteBinding.etNote.setText(alreadyAvailableNote.getNoteText());
         createNoteBinding.textDateTime.setText(alreadyAvailableNote.getDateTime());
+        createNoteBinding.categoryAutoComplete.setText(getCategoryNameById(alreadyAvailableNote.getCategoryId()));
 
         if(alreadyAvailableNote.getImagePath() != null && !alreadyAvailableNote.getImagePath().trim().isEmpty()){
             createNoteBinding.imageNote.setImageBitmap(BitmapFactory.decodeFile(alreadyAvailableNote.getImagePath()));
@@ -133,11 +140,12 @@ public class CreateNoteActivity extends AppCompatActivity {
         }
 
         if(alreadyAvailableNote.getWebLink() != null && !alreadyAvailableNote.getWebLink().trim().isEmpty()){
-            createNoteBinding.textWebUrl.setVisibility(View.VISIBLE);
+            createNoteBinding.layoutWebUrl.setVisibility(View.VISIBLE);
             createNoteBinding.textWebUrl.setText(alreadyAvailableNote.getWebLink());
-            createNoteBinding.imageDeleteImage.setVisibility(View.VISIBLE);
         }
+
     }
+
 
     private String getNoteStatus() {
         noteTitle = createNoteBinding.etNoteTitle.getText().toString();
@@ -165,8 +173,12 @@ public class CreateNoteActivity extends AppCompatActivity {
             note.setColor(selectedNoteColor);
             note.setImagePath(selectedImagePath);
             note.setDateTime(createNoteBinding.textDateTime.getText().toString());
+            note.setCategoryId(getCategoryIdByName(createNoteBinding.categoryAutoComplete.getText().toString()));
             if (!URL.isEmpty())
+            {
                 note.setWebLink(URL);
+                System.out.println("The URL Saved is : " + URL);
+            }
             if(alreadyAvailableNote != null)
                 note.setId(alreadyAvailableNote.getId());
 
@@ -259,7 +271,6 @@ public class CreateNoteActivity extends AppCompatActivity {
         }
     }
 
-
     private void setSubtitleIndicatorColor() {
         GradientDrawable gradientDrawable = (GradientDrawable) createNoteBinding.viewSubtitleIndicator.getBackground();
         gradientDrawable.setColor(Color.parseColor(selectedNoteColor));
@@ -336,11 +347,142 @@ public class CreateNoteActivity extends AppCompatActivity {
         dialogAddUrl.show();
     }
 
+    private void showAddCategoryDialog(){
+        if(dialogAddCategory == null){
+            AlertDialog.Builder  builder = new AlertDialog.Builder(this);
+            View view = LayoutInflater.from(this).inflate(R.layout.layout_add_category,
+                    (ViewGroup) findViewById(R.id.layout_addCategoryContainer));
+            builder.setView(view);
+            dialogAddCategory = builder.create();
+            if(dialogAddCategory.getWindow() != null){
+                dialogAddCategory.getWindow().setBackgroundDrawable(new ColorDrawable(0));
+            }
+            EditText et_addCategory = view.findViewById(R.id.et_addCategory);
+            et_addCategory.requestFocus();
+
+            view.findViewById(R.id.textAdd).setOnClickListener(view1 -> {
+                String Category = et_addCategory.getText().toString();
+                if (Category.trim().isEmpty()){
+                    Toast.makeText(CreateNoteActivity.this, "Enter Category Name", Toast.LENGTH_SHORT).show();
+                }
+                else if (isExist(Category))
+                    Toast.makeText(this, "Category Already Exists!", Toast.LENGTH_SHORT).show();
+                else{
+                    createNoteBinding.categoryAutoComplete.setText(Category);
+                    addNewCategory(Category);
+                    dialogAddCategory.dismiss();
+                }
+            });
+
+            view.findViewById(R.id.textCancelCategory).setOnClickListener(view12 -> dialogAddCategory.dismiss());
+        }
+        dialogAddCategory.show();
+    }
+
+    private void initializeSpinner(){
+        ArrayList<String> cats = new ArrayList<>();
+        cats.add("Add New Category");
+        cats.addAll(1, getCategoriesNames());
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_category_item, cats);
+        createNoteBinding.categoryAutoComplete.setAdapter(arrayAdapter);
+
+        createNoteBinding.categoryAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String selectedItem = parent.getItemAtPosition(position).toString();
+                System.out.println(selectedItem);
+                if (selectedItem.equals("Add New Category")) {
+                    showAddCategoryDialog();
+                } else{
+                    selectedCategory = getCategoryIdByName(selectedItem);
+                }
+            }
+        });
+    }
     private void deleteNote(Note note) throws InterruptedException {
-        Thread deleteThread = new Thread(() -> NotesDatabase.getInstance(getApplicationContext()).noteDao().deleteNote(note));
+        Thread deleteThread = new Thread(() ->
+                NotesDatabase
+                        .getInstance(getApplicationContext())
+                        .noteDao()
+                        .deleteNote(note));
         deleteThread.start();
         deleteThread.join();
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
+    }
+    private ArrayList<String> getCategoriesNames() {
+        ArrayList<String> categories = new ArrayList<>();
+        Thread getCategories = new Thread(() ->
+                categories.addAll(
+                        NotesDatabase
+                .getInstance(getApplicationContext())
+                .categoryDao()
+                .getCategoriesNames())
+        );
+        getCategories.start();
+
+        try {
+            getCategories.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        return categories;
+    }
+    private int getCategoryIdByName(String categoryName){
+        AtomicInteger categoryId = new AtomicInteger();
+        Thread deleteThread = new Thread(() ->
+                categoryId.set(NotesDatabase
+                        .getInstance(getApplicationContext())
+                        .categoryDao()
+                        .getCategoryIdByName(categoryName)));
+        deleteThread.start();
+        try {
+            deleteThread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return categoryId.get();
+    }
+    private String getCategoryNameById(int selectedCategory) {
+        final String[] category = new String[1];
+        Thread deleteThread = new Thread(() ->
+                category[0] = NotesDatabase
+                        .getInstance(getApplicationContext())
+                        .categoryDao()
+                        .getCategoryNameById(selectedCategory));
+        deleteThread.start();
+        try {
+            deleteThread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return category[0];
+    }
+    private void addNewCategory(String name){
+        Category category = new Category();
+        category.setCategoryName(name);
+
+        new Thread(() -> NotesDatabase.getInstance(getApplicationContext()).categoryDao().insertCategory(category)).start();
+
+}
+    private boolean isExist(String name){
+        AtomicBoolean Exist = new AtomicBoolean(false);
+        Thread thread = new Thread(() -> {
+            if (NotesDatabase
+                    .getInstance(getApplicationContext())
+                    .categoryDao()
+                    .getCategoryByName(name) != null)
+                Exist.set(true);
+
+        });
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return Exist.get();
+
     }
 }

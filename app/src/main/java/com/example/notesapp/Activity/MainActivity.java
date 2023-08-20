@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.example.notesapp.AsyncTasks.GetAllNotesTask;
 import com.example.notesapp.Database.NotesDatabase;
 import com.example.notesapp.Listeners.NotesListener;
+import com.example.notesapp.Model.Category;
 import com.example.notesapp.Model.Note;
 import com.example.notesapp.adapters.NotesAdapter;
 import com.example.notesapp.databinding.ActivityMainBinding;
@@ -34,6 +35,12 @@ public class MainActivity extends AppCompatActivity {
         mainBinding.imageAddNoteMain.setOnClickListener(view ->
                 startActivity(new Intent(getApplicationContext(), CreateNoteActivity.class)));
 
+
+//        String category = "Personal";
+//        Category category1 = new Category();
+//        category1.setCategoryName(category);
+//
+//        new Thread(() -> NotesDatabase.getInstance(getApplicationContext()).categoryDao().insertCategory(category1)).start();
     }
 
     @Override
