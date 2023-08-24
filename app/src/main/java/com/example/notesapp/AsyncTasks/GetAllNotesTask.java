@@ -29,7 +29,7 @@ public class GetAllNotesTask extends AsyncTask<Void, Void, List<Note>> {
     @Override
     protected List<Note> doInBackground(Void... voids) {
         Context context = mContextRef.get();
-        return NotesDatabase.getInstance(context).noteDao().getALlNotes();
+        return NotesDatabase.getInstance(context).noteDao().getActiveNotes();
     }
 
     @Override

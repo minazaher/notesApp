@@ -16,7 +16,8 @@ public interface NoteDao {
 
     @Query("Select * from notes order by id DESC")
     List<Note> getALlNotes();
-
+    @Query("Select * from notes where isArchived is 0 order by id DESC ")
+    List<Note> getActiveNotes();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertNote(Note note);
@@ -26,5 +27,8 @@ public interface NoteDao {
 
     @Query("SELECT * FROM notes WHERE category_id = :category")
     List<Note> getNotesByCategory(int category);
+
+    @Query("Select * from notes where isArchived is 1")
+    List<Note> getArchivedNotes();
 
 }

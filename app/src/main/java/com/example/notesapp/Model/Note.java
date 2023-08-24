@@ -40,12 +40,32 @@ public class Note implements Serializable {
     @ColumnInfo
     private String color;
 
+    private Boolean isArchived;
+    private Boolean isFavourite;
+
     @ColumnInfo(name = "web_link")
     private String webLink;
 
 
+    private String location;
     public int getId() {
         return id;
+    }
+
+    public Boolean getArchived() {
+        return isArchived;
+    }
+
+    public void setArchived(Boolean archived) {
+        isArchived = archived;
+    }
+
+    public Boolean getFavourite() {
+        return isFavourite;
+    }
+
+    public void setFavourite(Boolean favourite) {
+        isFavourite = favourite;
     }
 
     public void setId(int id) {
@@ -125,4 +145,13 @@ public class Note implements Serializable {
     public String toString() {
         return title + " : " + dateTime;
     }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
 }

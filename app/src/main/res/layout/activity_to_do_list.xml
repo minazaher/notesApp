@@ -4,6 +4,123 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     tools:context=".Activity.ToDoListActivity">
+
+
+    <TextView
+        android:id="@+id/tv_myTasks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:fontFamily="@font/ubuntu_bold"
+        android:includeFontPadding="false"
+        android:text="My Tasks"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_20ssp"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <LinearLayout
+        android:id="@+id/layout_searchTasks"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_marginHorizontal="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_15sdp"
+        android:background="@drawable/bg_search"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/_10sdp"
+        app:layout_constraintTop_toBottomOf="@id/tv_myTasks"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/_20sdp"
+            android:layout_height="@dimen/_20sdp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_search"
+            app:tint="@color/colorSearchIcon"/>
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/et_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/_5sdp"
+            android:background="@null"
+            android:iconifiedByDefault="false"
+            android:searchIcon="@null"
+            android:fontFamily="@font/ubuntu_regular"
+            android:imeOptions="actionDone"
+            app:hideNavigationIcon="true"
+            app:searchIcon="@null"
+            android:importantForAutofill="no"
+            android:includeFontPadding="false"
+            android:inputType="text"
+            app:iconifiedByDefault="false"
+            android:textColorHint="@color/white"
+            android:textSize="@dimen/_13ssp" />
+
+    </LinearLayout>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:orientation="vertical"
+    app:layout_constraintTop_toBottomOf="@id/layout_searchTasks"
+    app:layout_constraintBottom_toBottomOf="parent">
+
+    <TextView
+        android:id="@+id/tv_toDoTasks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:fontFamily="@font/ubuntu_medium"
+        android:includeFontPadding="false"
+        android:text="To-do List "
+        android:textColor="@color/white"
+        android:textSize="@dimen/_16ssp"
+        app:layout_constraintTop_toBottomOf="@id/layout_searchTasks"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/toDoTasksRecylerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:layout_marginHorizontal="@dimen/_2sdp"
+        android:clipChildren="false"
+        android:paddingStart="0dp"
+        android:paddingEnd="@dimen/_12sdp"
+        android:paddingBottom="@dimen/_12sdp"
+        app:layout_constraintBottom_toTopOf="@id/tv_doneTasks"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_toDoTasks" />
+
+    <TextView
+        android:id="@+id/tv_doneTasks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:fontFamily="@font/ubuntu_medium"
+        android:includeFontPadding="false"
+        android:text="Done List "
+        android:textColor="@color/white"
+        android:textSize="@dimen/_16ssp"
+        app:layout_constraintTop_toBottomOf="@id/toDoTasksRecylerView"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/notesRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:layout_marginHorizontal="@dimen/_2sdp"
+        android:clipChildren="false"
+        android:paddingStart="0dp"
+        android:paddingEnd="@dimen/_12sdp"
+        android:paddingBottom="@dimen/_12sdp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_doneTasks"
+        app:layout_constraintVertical_bias="0.091"
+        tools:layout_editor_absoluteX="-5dp" />
+</LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,66 +1,70 @@
 package com.example.notesapp.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.notesapp.Activity.CreateNoteActivity;
+import com.example.notesapp.Activity.MainActivity;
+import com.example.notesapp.Listeners.NotesListener;
+import com.example.notesapp.Model.Note;
 import com.example.notesapp.R;
+import com.example.notesapp.Repository.NotesRepository;
+import com.example.notesapp.adapters.NotesAdapter;
+import com.example.notesapp.databinding.FragmentCategoryNotesBinding;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link CategoryNotes#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.List;
+
 public class CategoryNotes extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    NotesRepository notesRepository;
+    FragmentCategoryNotesBinding fragment;
+    boolean archived ;
 
     public CategoryNotes() {
-        // Required empty public constructor
+        notesRepository = new NotesRepository(getContext());
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CategoryNotes.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CategoryNotes newInstance(String param1, String param2) {
+    public static CategoryNotes newInstance(boolean archived) {
         CategoryNotes fragment = new CategoryNotes();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putBoolean("isArchived", archived);
         fragment.setArguments(args);
         return fragment;
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            archived = getArguments().getBoolean("isArchived");
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_category_notes, container, false);
+        fragment = FragmentCategoryNotesBinding.inflate(getLayoutInflater(), container, false);
+
+        List<Note> fragmentNotes = notesRepository.getArchivedNotes();
+        System.out.println(fragmentNotes);
+        NotesAdapter notesAdapter = new NotesAdapter(fragmentNotes, (note, position) -> {
+            Intent intent = new Intent(getActivity(), CreateNoteActivity.class);
+            intent.putExtra("isViewOrUpdate", true);
+            intent.putExtra("note", note);
+            intent.putExtra("code", MainActivity.REQUEST_CODE_UPDATE_NOTE);
+            startActivity(intent);
+        });
+        fragment.categoryNotesRecyclerView.setAdapter(notesAdapter);
+        fragment.categoryNotesRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+        return fragment.getRoot();
     }
 }

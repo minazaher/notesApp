@@ -1,7 +1,11 @@
 package com.example.notesapp.Activity;
 
+import static com.example.notesapp.R.style.ColorPickerDialog_Dark;
+
 import android.Manifest;
 import android.content.ContentUris;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -9,10 +13,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,15 +33,16 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.notesapp.Database.NotesDatabase;
-import com.example.notesapp.Model.Category;
 import com.example.notesapp.Model.Note;
 import com.example.notesapp.R;
+import com.example.notesapp.Repository.CategoryRepository;
 import com.example.notesapp.databinding.ActivityCreateNoteBinding;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
@@ -43,10 +50,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class CreateNoteActivity extends AppCompatActivity {
+
+import me.jfenn.colorpickerdialog.dialogs.ColorPickerDialog;
+import me.jfenn.colorpickerdialog.interfaces.OnColorPickedListener;
+
+public class CreateNoteActivity extends AppCompatActivity{
     private static final String NOTE_TITLE_EMPTY = "Note title cannot be empty!";
     private static final String NOTE_TEXT_EMPTY = "Note text cannot be empty!";
     private static final String NOTE_SUBTITLE_EMPTY = "Note subtitle cannot be empty!";
@@ -59,25 +68,33 @@ public class CreateNoteActivity extends AppCompatActivity {
 
     String noteTitle, noteText, noteSubtitle;
     private String selectedNoteColor;
+    Boolean isArchived = false ;
+    Boolean isFavourite= false ;
+
     private String selectedImagePath;
     private String URL ="";
     private int selectedCategory;
-
+    private CategoryRepository categoryRepository;
     private AlertDialog dialogAddUrl;
     private Note alreadyAvailableNote;
     private AlertDialog dialogAddCategory;
+    public static String selectedLocation  ;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)  {
         super.onCreate(savedInstanceState);
         createNoteBinding = ActivityCreateNoteBinding.inflate(getLayoutInflater());
         setContentView(createNoteBinding.getRoot());
+        categoryRepository = new CategoryRepository(this);
         selectedNoteColor = "#deeae6";
 
         if (getIntent().getBooleanExtra("isViewOrUpdate", false)){
             alreadyAvailableNote = (Note) getIntent().getSerializableExtra("note");
+            createNoteBinding.misc.layoutAddToArchive.setVisibility(View.VISIBLE);
+            createNoteBinding.misc.layoutDeleteNote.setVisibility(View.VISIBLE);
             setViewOrUpdateNote();
         }
+        initializeColorPicker();
 
         selectPhoto = registerForActivityResult(new ActivityResultContracts.GetContent(), result -> {
             createNoteBinding.imageDeleteImage.setVisibility(View.VISIBLE);
@@ -86,7 +103,7 @@ public class CreateNoteActivity extends AppCompatActivity {
         });
 
         createNoteBinding.imageBack.setOnClickListener(view -> onBackPressed());
-
+        createNoteBinding.misc.layoutAddToArchive.setOnClickListener(view -> {isArchived = !alreadyAvailableNote.getArchived();});
         initializeMisc();
 
         createNoteBinding.textDateTime.setText(
@@ -124,13 +141,46 @@ public class CreateNoteActivity extends AppCompatActivity {
         initializeSpinner();
 
     }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (getIntent().getStringExtra("location") != null){
+            selectedLocation = getIntent().getStringExtra("location");
+        }
+
+        createNoteBinding.misc.layoutAddLocation.setOnClickListener(view -> {
+            if (isLocationEnabled())
+                startActivity(new Intent(CreateNoteActivity.this, GetLocationActivity.class));
+            else
+                showTurnLocationOnDialog();
+        });
+
+    }
+    private boolean isLocationEnabled() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+    private void showTurnLocationOnDialog(){
+        if (!isLocationEnabled()) {
+            new AlertDialog.Builder(this)
+                    .setMessage("Your location settings are turned off. Please turn them on to use this feature.")
+                    .setPositiveButton("Settings", (dialog, which) -> {
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        }
+
+    }
 
     private void setViewOrUpdateNote(){
+        selectedNoteColor = alreadyAvailableNote.getColor();
         createNoteBinding.etNoteTitle.setText(alreadyAvailableNote.getTitle());
         createNoteBinding.etNoteSubtitle.setText(alreadyAvailableNote.getSubtitle());
         createNoteBinding.etNote.setText(alreadyAvailableNote.getNoteText());
         createNoteBinding.textDateTime.setText(alreadyAvailableNote.getDateTime());
-        createNoteBinding.categoryAutoComplete.setText(getCategoryNameById(alreadyAvailableNote.getCategoryId()));
+        createNoteBinding.categoryAutoComplete.setText(categoryRepository.getCategoryNameById(alreadyAvailableNote.getCategoryId()));
 
         if(alreadyAvailableNote.getImagePath() != null && !alreadyAvailableNote.getImagePath().trim().isEmpty()){
             createNoteBinding.imageNote.setImageBitmap(BitmapFactory.decodeFile(alreadyAvailableNote.getImagePath()));
@@ -143,9 +193,10 @@ public class CreateNoteActivity extends AppCompatActivity {
             createNoteBinding.layoutWebUrl.setVisibility(View.VISIBLE);
             createNoteBinding.textWebUrl.setText(alreadyAvailableNote.getWebLink());
         }
+        if (alreadyAvailableNote.getArchived().equals(true))
+            createNoteBinding.misc.layoutAddToArchive.setVisibility(View.GONE);
 
     }
-
 
     private String getNoteStatus() {
         noteTitle = createNoteBinding.etNoteTitle.getText().toString();
@@ -173,11 +224,16 @@ public class CreateNoteActivity extends AppCompatActivity {
             note.setColor(selectedNoteColor);
             note.setImagePath(selectedImagePath);
             note.setDateTime(createNoteBinding.textDateTime.getText().toString());
-            note.setCategoryId(getCategoryIdByName(createNoteBinding.categoryAutoComplete.getText().toString()));
+            note.setArchived(isArchived);
+            note.setFavourite(isFavourite);
+            note.setCategoryId(categoryRepository.getCategoryIdByName(createNoteBinding.categoryAutoComplete.getText().toString()));
             if (!URL.isEmpty())
             {
                 note.setWebLink(URL);
                 System.out.println("The URL Saved is : " + URL);
+            }
+            if (selectedLocation != null){
+                note.setLocation(selectedLocation);
             }
             if(alreadyAvailableNote != null)
                 note.setId(alreadyAvailableNote.getId());
@@ -207,6 +263,28 @@ public class CreateNoteActivity extends AppCompatActivity {
 
     }
 
+    private void initializeColorPicker(){
+        createNoteBinding.misc.tvPickColor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new ColorPickerDialog()
+                        .withColor(Color.RED)
+                        .withAlphaEnabled(true)
+                        .withTitle("Pick Your Note Color")
+                        .withCornerRadius(5.0F)
+                        .withTheme(ColorPickerDialog_Dark)
+                        .withListener(new OnColorPickedListener<ColorPickerDialog>() {
+                            @Override
+                            public void onColorPicked(@Nullable ColorPickerDialog dialog, int color) {
+                                selectedNoteColor = String.format("#%06X", (0xFFFFFF & color));
+                                setSubtitleIndicatorColor();
+                                Toast.makeText(CreateNoteActivity.this, "Color Picked!", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .show(getSupportFragmentManager(), "colorPicker");
+            }
+        });
+    }
     public void selectImage() {
         selectPhoto.launch("image/*");
     }
@@ -365,11 +443,11 @@ public class CreateNoteActivity extends AppCompatActivity {
                 if (Category.trim().isEmpty()){
                     Toast.makeText(CreateNoteActivity.this, "Enter Category Name", Toast.LENGTH_SHORT).show();
                 }
-                else if (isExist(Category))
+                else if (categoryRepository.isExist(Category))
                     Toast.makeText(this, "Category Already Exists!", Toast.LENGTH_SHORT).show();
                 else{
                     createNoteBinding.categoryAutoComplete.setText(Category);
-                    addNewCategory(Category);
+                    categoryRepository.addNewCategory(Category);
                     dialogAddCategory.dismiss();
                 }
             });
@@ -382,7 +460,7 @@ public class CreateNoteActivity extends AppCompatActivity {
     private void initializeSpinner(){
         ArrayList<String> cats = new ArrayList<>();
         cats.add("Add New Category");
-        cats.addAll(1, getCategoriesNames());
+        cats.addAll(1, categoryRepository.getCategoriesNames());
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_category_item, cats);
         createNoteBinding.categoryAutoComplete.setAdapter(arrayAdapter);
 
@@ -393,8 +471,8 @@ public class CreateNoteActivity extends AppCompatActivity {
                 System.out.println(selectedItem);
                 if (selectedItem.equals("Add New Category")) {
                     showAddCategoryDialog();
-                } else{
-                    selectedCategory = getCategoryIdByName(selectedItem);
+                } else {
+                    selectedCategory = categoryRepository.getCategoryIdByName(selectedItem);
                 }
             }
         });
@@ -410,79 +488,5 @@ public class CreateNoteActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
     }
-    private ArrayList<String> getCategoriesNames() {
-        ArrayList<String> categories = new ArrayList<>();
-        Thread getCategories = new Thread(() ->
-                categories.addAll(
-                        NotesDatabase
-                .getInstance(getApplicationContext())
-                .categoryDao()
-                .getCategoriesNames())
-        );
-        getCategories.start();
 
-        try {
-            getCategories.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        return categories;
-    }
-    private int getCategoryIdByName(String categoryName){
-        AtomicInteger categoryId = new AtomicInteger();
-        Thread deleteThread = new Thread(() ->
-                categoryId.set(NotesDatabase
-                        .getInstance(getApplicationContext())
-                        .categoryDao()
-                        .getCategoryIdByName(categoryName)));
-        deleteThread.start();
-        try {
-            deleteThread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        return categoryId.get();
-    }
-    private String getCategoryNameById(int selectedCategory) {
-        final String[] category = new String[1];
-        Thread deleteThread = new Thread(() ->
-                category[0] = NotesDatabase
-                        .getInstance(getApplicationContext())
-                        .categoryDao()
-                        .getCategoryNameById(selectedCategory));
-        deleteThread.start();
-        try {
-            deleteThread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        return category[0];
-    }
-    private void addNewCategory(String name){
-        Category category = new Category();
-        category.setCategoryName(name);
-
-        new Thread(() -> NotesDatabase.getInstance(getApplicationContext()).categoryDao().insertCategory(category)).start();
-
-}
-    private boolean isExist(String name){
-        AtomicBoolean Exist = new AtomicBoolean(false);
-        Thread thread = new Thread(() -> {
-            if (NotesDatabase
-                    .getInstance(getApplicationContext())
-                    .categoryDao()
-                    .getCategoryByName(name) != null)
-                Exist.set(true);
-
-        });
-        thread.start();
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        return Exist.get();
-
-    }
 }

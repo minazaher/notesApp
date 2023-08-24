@@ -16,7 +16,7 @@ import com.example.notesapp.Model.Note;
 import com.example.notesapp.dao.CategoryDao;
 import com.example.notesapp.dao.NoteDao;
 
-@Database(entities = {Category.class, Note.class},version = 2, exportSchema = false)
+@Database(entities = {Category.class, Note.class},version = 4, exportSchema = false)
 public abstract class NotesDatabase extends RoomDatabase {
     private static NotesDatabase notesDatabase;
 
