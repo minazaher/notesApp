@@ -24,6 +24,13 @@
         <item>Learning</item>
         <item>Health</item>
     </string-array>
+
+    <string-array name="task_priority">
+        <item>1 - Very High</item>
+        <item>2 - Medium</item>
+        <item>3 - Not Important</item>
+    </string-array>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="archive">Archive</string>

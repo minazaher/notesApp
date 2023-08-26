@@ -29,7 +29,7 @@ public class Note implements Serializable {
     private String subtitle;
 
     @ColumnInfo(index = true, name = "category_id")
-    private int categoryId; // Foreign key column
+    private int categoryId;
 
     @ColumnInfo(name = "note_text")
     private String noteText;

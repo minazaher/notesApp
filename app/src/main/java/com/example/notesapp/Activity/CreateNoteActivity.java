@@ -88,6 +88,7 @@ public class CreateNoteActivity extends AppCompatActivity{
         categoryRepository = new CategoryRepository(this);
         selectedNoteColor = "#deeae6";
 
+
         if (getIntent().getBooleanExtra("isViewOrUpdate", false)){
             alreadyAvailableNote = (Note) getIntent().getSerializableExtra("note");
             createNoteBinding.misc.layoutAddToArchive.setVisibility(View.VISIBLE);

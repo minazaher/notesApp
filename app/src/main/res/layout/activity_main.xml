@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
-    tools:openDrawer="start"
     android:fitsSystemWindows="true"
     tools:context=".Activity.MainActivity">
 
@@ -129,20 +128,81 @@
             app:tint="@color/colorIcons"/>
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/image_addNoteMain"
-        android:layout_width="@dimen/_40sdp"
-        android:layout_height="@dimen/_40sdp"
-        android:layout_marginEnd="@dimen/_30sdp"
-        android:background="@drawable/bg_add_button"
-        app:layout_constraintTop_toTopOf="@id/layout_quickActions"
-        app:layout_constraintBottom_toTopOf="@+id/layout_quickActions"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:contentDescription="@string/app_name"
-        android:src="@drawable/ic_add"
-        android:padding="@dimen/_5sdp"
-        app:tint="@color/colorPrimary"/>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_addNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/_24sdp"
+            android:layout_marginBottom="@dimen/_24sdp"
+            app:layout_constraintTop_toTopOf="@id/layout_quickActions"
+            app:layout_constraintBottom_toTopOf="@+id/layout_quickActions"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat = "@drawable/ic_add"
+            app:tint="@color/black"
+            app:fab_colorDisabled="@color/colorIcons"
+            android:clickable="false"
+            android:focusable="true"
+            app:maxImageSize="@dimen/_24sdp"
+            android:backgroundTint="@color/colorAccent"
+            android:background="@color/colorAccent"
+            android:contentDescription="@string/app_name" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_writeNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/_24sdp"
+            android:layout_marginBottom="@dimen/_24sdp"
+            app:layout_constraintBottom_toTopOf="@+id/fab_addNote"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat = "@drawable/ic_write_note_24"
+            app:tint="@color/black"
+            android:clickable="false"
+            android:focusable="true"
+            app:maxImageSize="@dimen/_24sdp"
+            android:backgroundTint="@color/colorAccent"
+            android:background="@color/colorAccent"
+            android:contentDescription="@string/app_name"
+            android:visibility="invisible"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_attachVoiceNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/_24sdp"
+            android:layout_marginBottom="@dimen/_24sdp"
+            app:layout_constraintBottom_toTopOf="@+id/fab_writeNote"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat = "@drawable/add_voice_note_24"
+            app:tint="@color/black"
+            app:fab_colorDisabled="@color/colorIcons"
+            android:clickable="false"
+            android:focusable="true"
+            app:maxImageSize="@dimen/_24sdp"
+            android:backgroundTint="@color/colorAccent"
+            android:background="@color/colorAccent"
+            android:visibility="invisible"/>
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_ASR_note"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/_24sdp"
+            android:layout_marginBottom="@dimen/_24sdp"
+            app:layout_constraintBottom_toTopOf="@+id/fab_attachVoiceNote"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat = "@drawable/speech_note_24"
+            app:tint="@color/black"
+            app:fab_colorDisabled="@color/colorIcons"
+            android:clickable="false"
+            android:focusable="true"
+            app:maxImageSize="@dimen/_20sdp"
+            android:backgroundTint="@color/colorAccent"
+            android:background="@color/colorAccent"
+            android:contentDescription="@string/app_name"
+            android:visibility="invisible"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>
