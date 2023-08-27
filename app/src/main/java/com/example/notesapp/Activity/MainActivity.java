@@ -285,7 +285,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             intent.putExtra("isArchived", true);
             startActivity(intent);
         }
+        else if(item.getItemId() == R.id.nav_todo)
+        {
+            Intent intent = new Intent(MainActivity.this, ToDoListActivity.class);
+            startActivity(intent);
+        }
         drawerLayout.closeDrawer(GravityCompat.START);
+
         return true;
     }
 

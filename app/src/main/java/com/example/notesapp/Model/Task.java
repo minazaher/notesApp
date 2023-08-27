@@ -9,9 +9,10 @@ public class Task {
     private int taskId;
     private String taskName;
     private int priority;
+    private String taskSubtitle;
     private boolean isCompleted;
     private String creationDate;
-    private String completionDate;
+    private TaskDate completionDate;
 
     public Task() {
     }
@@ -48,6 +49,7 @@ public class Task {
         isCompleted = completed;
     }
 
+
     public String getCreationDate() {
         return creationDate;
     }
@@ -56,11 +58,19 @@ public class Task {
         this.creationDate = creationDate;
     }
 
-    public String getCompletionDate() {
+    public TaskDate getCompletionDate() {
         return completionDate;
     }
 
-    public void setCompletionDate(String completionDate) {
+    public void setCompletionDate(TaskDate completionDate) {
         this.completionDate = completionDate;
+    }
+
+    public String getTaskSubtitle() {
+        return taskSubtitle;
+    }
+
+    public void setTaskSubtitle(String taskSubtitle) {
+        this.taskSubtitle = taskSubtitle;
     }
 }

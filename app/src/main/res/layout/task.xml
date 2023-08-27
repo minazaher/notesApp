@@ -4,10 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="120dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_margin="@dimen/_25sdp"
+    android:layout_marginHorizontal="@dimen/_15sdp"
+    android:layout_marginTop="@dimen/_15sdp"
     android:background="@drawable/bg_search"
     android:backgroundTint="@color/colorSearchBackground"
     app:cardCornerRadius="@dimen/_10sdp">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -17,6 +19,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:elevation="@dimen/_50sdp"
             android:backgroundTint="@color/colorSearchBackground"
             app:cardElevation="@dimen/_24sdp">
 
@@ -42,12 +45,12 @@
                android:id="@+id/tv_taskDayNumber"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               android:text="09"
-               android:fontFamily="@font/ubuntu_medium"
-               android:textColor="@color/colorAccent"
-               android:textSize="@dimen/_16ssp"
+               android:layout_gravity="center"
                android:layout_marginBottom="@dimen/_5sdp"
-               android:layout_gravity="center"/>
+               android:fontFamily="@font/ubuntu_medium"
+               android:text="09"
+               android:textColor="@color/colorAccent"
+               android:textSize="@dimen/_16ssp" />
            <TextView
                android:id="@+id/tv_taskMonth"
                android:layout_width="wrap_content"
@@ -71,14 +74,14 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:paddingTop="@dimen/_15sdp"
+            android:layout_gravity="center_vertical"
             android:layout_weight="5">
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_gravity="start"
                 android:layout_weight="1"
-                android:gravity="start"
+                android:gravity="center_vertical"
                 android:orientation="vertical"
                 android:paddingStart="@dimen/_10sdp">
 
@@ -87,19 +90,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginBottom="@dimen/_5sdp"
+                    android:layout_marginBottom="@dimen/_6sdp"
                     android:text="Task Name"
                     android:includeFontPadding="false"
                     android:fontFamily="@font/ubuntu_bold"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/_16ssp" />
+                    android:textSize="@dimen/_14ssp" />
 
                 <TextView
-                    android:id="@+id/tv_TaskDescription"
+                    android:id="@+id/tv_taskSubtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginBottom="@dimen/_5sdp"
+                    android:layout_marginBottom="@dimen/_6sdp"
                     android:fontFamily="@font/ubuntu_regular"
                     android:text="Task Description"
                     android:includeFontPadding="false"
@@ -118,29 +121,61 @@
                     android:textSize="@dimen/_12ssp" />
             </LinearLayout>
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
-                android:orientation="vertical"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:layout_weight="0.25">
+
                 <ImageView
+                    android:id="@+id/image_setTaskCompleted"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
-                    android:layout_marginEnd="@dimen/_15sdp"
+                    android:layout_marginBottom="36dp"
+                    android:background="@drawable/bg_done_button"
+                    android:padding="@dimen/_2sdp"
                     android:src="@drawable/ic_done"
-                    app:tint="@color/white"/>
+                    app:layout_constraintBottom_toTopOf="@+id/guideline3"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.85"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.8"
+                    app:tint="@color/colorSearchBackground" />
+
                 <TextView
                     android:id="@+id/tv_taskStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:fontFamily="@font/ubuntu_bold"
                     android:text="Status"
-                    android:layout_marginHorizontal="@dimen/_20sdp"
                     android:textColor="@color/colorDelete"
-                    android:layout_marginTop="@dimen/_40sdp"
-                    android:layout_gravity="bottom"
                     android:textSize="@dimen/_12ssp"
-                    android:fontFamily="@font/ubuntu_regular"/>
-            </LinearLayout>
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.509"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/image_setTaskCompleted"
+                    app:layout_constraintVertical_bias="0.703" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintGuide_begin="65dp" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintGuide_begin="83dp" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
         </LinearLayout>
     </LinearLayout>

@@ -29,9 +29,12 @@
         <activity
             android:name=".Activity.CategoryNotesActivity"
             android:exported="false" />
+
+
         <activity
             android:name=".Activity.ToDoListActivity"
-            android:exported="false" />
+            android:exported="true"/>
+
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -45,9 +48,7 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
+
         </activity>
         <activity
             android:name=".Activity.MainActivity"
@@ -59,10 +60,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
+
         </activity>
     </application>
 

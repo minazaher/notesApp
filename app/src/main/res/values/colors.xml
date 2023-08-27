@@ -11,7 +11,8 @@
     <color name="colorPrimary1">#FF80AB</color>
     <color name="colorPrimaryDark1">#FF4081</color>
     <color name="colorAccent">#FFD54F</color>
-    <color name="colorDelete">#FF0000</color>
+    <color name="colorDelete">#FF5858</color>
+    <color name="colorCompleted">#4CAF50</color>
 <!--    <color name="colorSearchBackground">#F06292</color>-->
 <!--    <color name="colorSearchIcon">#FFFFFF</color>-->
 <!--    <color name="colorTextHint">#FFFFFF</color>-->

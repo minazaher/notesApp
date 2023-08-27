@@ -4,19 +4,22 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.room.Database;
-import androidx.room.DatabaseConfiguration;
-import androidx.room.InvalidationTracker;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
-import androidx.sqlite.db.SupportSQLiteOpenHelper;
 
+import com.example.notesapp.Converters.mConverters;
 import com.example.notesapp.Model.Category;
 import com.example.notesapp.Model.Note;
+import com.example.notesapp.Model.Task;
+import com.example.notesapp.Model.TaskDate;
 import com.example.notesapp.dao.CategoryDao;
 import com.example.notesapp.dao.NoteDao;
+import com.example.notesapp.dao.TaskDao;
 
-@Database(entities = {Category.class, Note.class},version = 4, exportSchema = false)
+@Database(entities = {Category.class, Note.class, Task.class},version = 7, exportSchema = false )
+@TypeConverters(mConverters.class)
 public abstract class NotesDatabase extends RoomDatabase {
     private static NotesDatabase notesDatabase;
 
@@ -27,6 +30,7 @@ public abstract class NotesDatabase extends RoomDatabase {
             new Thread(() -> {
                 NoteDao noteDao = notesDatabase.noteDao();
                 CategoryDao categoryDao = notesDatabase.categoryDao();
+                TaskDao taskDao = notesDatabase.taskDao();
             });
         }
     };
@@ -44,5 +48,6 @@ public abstract class NotesDatabase extends RoomDatabase {
 
     public abstract NoteDao noteDao();
     public abstract CategoryDao categoryDao();
+    public abstract TaskDao taskDao();
 
 }

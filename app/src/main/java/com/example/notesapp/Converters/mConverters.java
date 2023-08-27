@@ -4,7 +4,7 @@ import androidx.room.TypeConverter;
 
 import com.example.notesapp.Model.TaskDate;
 
-public class TypeConverters {
+public class mConverters {
         @TypeConverter
         public static String fromTaskDate(TaskDate taskDate) {
             return taskDate.getDayName() + "," + taskDate.getDayNumber() + ","
