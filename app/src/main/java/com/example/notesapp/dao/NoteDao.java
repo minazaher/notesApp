@@ -18,14 +18,13 @@ public interface NoteDao {
     List<Note> getALlNotes();
     @Query("Select * from notes where isArchived is 0 order by id DESC ")
     List<Note> getActiveNotes();
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertNote(Note note);
 
     @Delete(entity = Note.class)
     void deleteNote(Note note);
 
-    @Query("SELECT * FROM notes WHERE category_id = :category")
+    @Query("SELECT * FROM notes WHERE category_id = :category and isArchived is 0")
     List<Note> getNotesByCategory(int category);
 
     @Query("Select * from notes where isArchived is 1")

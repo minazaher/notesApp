@@ -15,36 +15,42 @@ import com.example.notesapp.Activity.MainActivity;
 import com.example.notesapp.Listeners.NotesListener;
 import com.example.notesapp.Model.Note;
 import com.example.notesapp.R;
+import com.example.notesapp.Repository.CategoryRepository;
 import com.example.notesapp.Repository.NotesRepository;
 import com.example.notesapp.adapters.NotesAdapter;
 import com.example.notesapp.databinding.FragmentCategoryNotesBinding;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryNotes extends Fragment {
 
     NotesRepository notesRepository;
+    CategoryRepository categoryRepository ;
     FragmentCategoryNotesBinding fragment;
     boolean archived ;
+    String categoryName;
 
     public CategoryNotes() {
         notesRepository = new NotesRepository(getContext());
+        categoryRepository = new CategoryRepository(getContext());
     }
 
-    public static CategoryNotes newInstance(boolean archived) {
+    public static CategoryNotes newInstance(boolean archived, String categoryName) {
         CategoryNotes fragment = new CategoryNotes();
         Bundle args = new Bundle();
         args.putBoolean("isArchived", archived);
+        args.putString("categoryName", categoryName);
         fragment.setArguments(args);
         return fragment;
     }
-
-
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             archived = getArguments().getBoolean("isArchived");
+            categoryName = getArguments().getString("categoryName");
         }
 
     }
@@ -54,8 +60,7 @@ public class CategoryNotes extends Fragment {
                              Bundle savedInstanceState) {
         fragment = FragmentCategoryNotesBinding.inflate(getLayoutInflater(), container, false);
 
-        List<Note> fragmentNotes = notesRepository.getArchivedNotes();
-        System.out.println(fragmentNotes);
+        List<Note> fragmentNotes = getData();
         NotesAdapter notesAdapter = new NotesAdapter(fragmentNotes, (note, position) -> {
             Intent intent = new Intent(getActivity(), CreateNoteActivity.class);
             intent.putExtra("isViewOrUpdate", true);
@@ -66,5 +71,16 @@ public class CategoryNotes extends Fragment {
         fragment.categoryNotesRecyclerView.setAdapter(notesAdapter);
         fragment.categoryNotesRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         return fragment.getRoot();
+    }
+
+
+    ArrayList<Note> getData(){
+        if(archived){
+            return notesRepository.getArchivedNotes();
+        }
+        else {
+            int id = categoryRepository.getCategoryIdByName(categoryName);
+            return notesRepository.getNotesByCategory(id);
+        }
     }
 }

@@ -15,6 +15,7 @@ public interface CategoryDao {
     @Query("SELECT * FROM categories")
     List<Category> getAllCategories();
 
+
     @Query("Select category_name from categories")
     List<String> getCategoriesNames();
     @Insert

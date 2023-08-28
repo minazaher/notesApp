@@ -38,5 +38,7 @@
     <string name="trash">Trash</string>
     <string name="notes">Notes</string>
     <string name="to_do_list">To-Do List</string>
+    <string name="select_task_priority">Select Task Priority</string>
+    <string name="type_task_description_here_optional">Type task description here (optional)</string>
 
 </resources>

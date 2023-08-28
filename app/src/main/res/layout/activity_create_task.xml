@@ -77,37 +77,42 @@
             android:imeOptions="actionDone"
             android:importantForAutofill="no"
             android:includeFontPadding="false"
-            android:inputType="textMultiLine"
+            android:editable="false"
             android:paddingVertical="@dimen/_8sdp"
             android:textColor="@color/colorTextSubtitle"
             android:textColorHint="@color/colorTextHint"
             android:textSize="@dimen/_13ssp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/text_taskDateTime"
-            app:layout_constraintBottom_toTopOf="@id/et_taskPriority">
+            app:layout_constraintBottom_toTopOf="@id/et_taskPriority"/>
 
-        </EditText>
+        <com.google.android.material.textfield.TextInputLayout
 
-        <EditText
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:id="@+id/et_taskPriority"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/_12sdp"
-            android:layout_marginTop="@dimen/_15sdp"
-            android:background="@null"
-            android:fontFamily="@font/ubuntu_medium"
-            android:hint="Task Priority"
-            android:imeOptions="actionDone"
-            android:importantForAutofill="no"
-            android:includeFontPadding="false"
-            android:inputType="textMultiLine"
-            android:paddingVertical="@dimen/_8sdp"
-            android:textColor="@color/colorTextSubtitle"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginTop="@dimen/_16sdp"
+            android:hint="@string/select_task_priority"
+            app:expandedHintEnabled="true"
+            app:boxStrokeColor="@color/colorTextHint"
+            app:boxBackgroundColor="@color/colorPrimary"
             android:textColorHint="@color/colorTextHint"
-            android:textSize="@dimen/_13ssp"
+            app:hintTextColor="@color/colorTextHint"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/viewPriorityIndicator"
-            app:layout_constraintTop_toBottomOf="@id/et_pick_due_date" />
+            app:layout_constraintTop_toBottomOf="@id/et_pick_due_date">
+        <AutoCompleteTextView
+            android:id="@+id/priority_auto_complete"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:maxLines="3"
+            android:inputType="none"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_14ssp"/>
+
+</com.google.android.material.textfield.TextInputLayout>
 
         <View
             android:id="@+id/viewPriorityIndicator"
@@ -119,8 +124,28 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/et_taskPriority" />
 
-
-
+        <EditText
+            android:id="@+id/et_taskSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginVertical="@dimen/_15sdp"
+            android:background="@null"
+            android:fontFamily="@font/ubuntu_regular"
+            android:gravity="top"
+            android:hint="@string/type_task_description_here_optional"
+            android:importantForAutofill="no"
+            android:includeFontPadding="false"
+            android:inputType="textMultiLine"
+            android:minHeight="@dimen/_100sdp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/colorTextHint"
+            android:textSize="@dimen/_13ssp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/viewPriorityIndicator"
+            app:layout_constraintVertical_bias="0.092" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

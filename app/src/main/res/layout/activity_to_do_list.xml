@@ -104,7 +104,7 @@
         android:layout_marginHorizontal="@dimen/_12sdp"
         android:fontFamily="@font/ubuntu_medium"
         android:includeFontPadding="false"
-        android:text="Done List "
+        android:text="Completed List "
         android:textColor="@color/white"
         android:textSize="@dimen/_16ssp"
         app:layout_constraintTop_toBottomOf="@id/toDoTasksRecyclerView" />
@@ -112,8 +112,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/completedTasksRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="3"
+        android:layout_height="@dimen/_120sdp"
         android:layout_marginHorizontal="@dimen/_2sdp"
         android:alpha="0.7"
         android:clipChildren="false"

@@ -24,30 +24,36 @@ public class Note implements Serializable {
 
     @ColumnInfo(name = "date_time")
     private String dateTime;
-
     @ColumnInfo
     private String subtitle;
-
     @ColumnInfo(index = true, name = "category_id")
     private int categoryId;
-
     @ColumnInfo(name = "note_text")
     private String noteText;
-
     @ColumnInfo(name = "image_path")
     private String imagePath;
-
     @ColumnInfo
     private String color;
-
     private Boolean isArchived;
     private Boolean isFavourite;
-
     @ColumnInfo(name = "web_link")
     private String webLink;
-
-
     private String location;
+
+    public Note(String noteText) {
+        this.noteText = noteText;
+        title = "NONE";
+        dateTime = "NONE";
+        subtitle = "NONE";
+        categoryId = 0;
+        imagePath = "NONE";
+        color = "NONE";
+        isArchived = false;
+        isFavourite = false;
+        webLink = "NONE";
+        location = "NONE";
+    }
+
     public int getId() {
         return id;
     }

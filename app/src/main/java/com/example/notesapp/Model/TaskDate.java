@@ -1,5 +1,7 @@
 package com.example.notesapp.Model;
 
+import androidx.annotation.NonNull;
+
 public class TaskDate {
     private String dayName;
     private String dayNumber;
@@ -44,5 +46,12 @@ public class TaskDate {
 
     public void setHour(String hour) {
         this.hour = hour;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return  dayName + ", " + dayNumber + " " + month + " at " + hour;
+
     }
 }

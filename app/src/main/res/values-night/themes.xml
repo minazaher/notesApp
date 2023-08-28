@@ -17,6 +17,12 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="NavigationDrawerSubheaderStyle" parent="TextAppearance.AppCompat.Subhead">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:titleTextColor">@color/white</item>
+    </style>
+
+
     <style name="ActionBarWidgetTheme" parent="@android:style/Theme.Holo">
         <item name="android:textColorHint">@color/white</item>
     </style>

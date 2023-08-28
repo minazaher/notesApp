@@ -30,4 +30,19 @@ public class NotesRepository {
         }
         return archivedNotes;
     }
+
+    public ArrayList<Note> getNotesByCategory(int id){
+        ArrayList<Note> categoryNotes = new ArrayList<>();
+        Thread getArchived = new Thread(() ->
+                categoryNotes.addAll(NotesDatabase.getInstance(mContextRef.get()).noteDao().getNotesByCategory(id)));
+        getArchived.start();
+        try {
+            getArchived.join();
+        } catch (InterruptedException e) {
+            Toast.makeText(mContextRef.get(), "Error! Try Again Later", Toast.LENGTH_SHORT).show();
+            throw new RuntimeException(e);
+        }
+        return categoryNotes;
+    }
+
 }

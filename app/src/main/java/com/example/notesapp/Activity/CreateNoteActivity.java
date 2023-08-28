@@ -274,13 +274,10 @@ public class CreateNoteActivity extends AppCompatActivity{
                         .withTitle("Pick Your Note Color")
                         .withCornerRadius(5.0F)
                         .withTheme(ColorPickerDialog_Dark)
-                        .withListener(new OnColorPickedListener<ColorPickerDialog>() {
-                            @Override
-                            public void onColorPicked(@Nullable ColorPickerDialog dialog, int color) {
-                                selectedNoteColor = String.format("#%06X", (0xFFFFFF & color));
-                                setSubtitleIndicatorColor();
-                                Toast.makeText(CreateNoteActivity.this, "Color Picked!", Toast.LENGTH_SHORT).show();
-                            }
+                        .withListener((dialog, color) -> {
+                            selectedNoteColor = String.format("#%06X", (0xFFFFFF & color));
+                            setSubtitleIndicatorColor();
+                            Toast.makeText(CreateNoteActivity.this, "Color Picked!", Toast.LENGTH_SHORT).show();
                         })
                         .show(getSupportFragmentManager(), "colorPicker");
             }

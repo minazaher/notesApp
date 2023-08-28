@@ -6,7 +6,10 @@ import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -30,6 +33,7 @@ public class CreateTaskActivity extends AppCompatActivity {
     int mHour = c.get(Calendar.HOUR_OF_DAY);
     int mMinute = c.get(Calendar.MINUTE);
     TaskDate taskDue ;
+    int selectedPriority;
     String creationDate, taskTitle, taskSubtitle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +41,11 @@ public class CreateTaskActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_task);
         binding = ActivityCreateTaskBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        creationDate= new SimpleDateFormat("EEEE, dd MMMM, yyyy HH:mm a ", Locale.getDefault())
+        String creationDate = new SimpleDateFormat("EEEE, dd MMMM, yyyy  HH:mm a", Locale.getDefault())
                 .format(new Date());
-        binding.textTaskDateTime.setText(creationDate);
 
+        binding.textTaskDateTime.setText(creationDate);
+        initializeSpinner();
         binding.etPickDueDate.setOnClickListener(view -> showPickDateDialog());
         binding.imageSaveTask.setOnClickListener(view -> {
             saveTask();
@@ -48,6 +53,15 @@ public class CreateTaskActivity extends AppCompatActivity {
         });
     }
 
+    private void initializeSpinner(){
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.task_priority, R.layout.spinner_category_item);
+        binding.priorityAutoComplete.setAdapter(adapter);
+        binding.priorityAutoComplete.setOnItemClickListener((parent, view, position, id) -> {
+                selectedPriority = position+1;
+            System.out.println(selectedPriority);
+            });
+    }
 
     void showPickDateDialog(){
         taskDue = new TaskDate();
@@ -56,6 +70,7 @@ public class CreateTaskActivity extends AppCompatActivity {
                         (datePicker, year, month, day) -> {
                             Calendar s = Calendar.getInstance();
                             s.set(year, month, day);
+                            System.out.println("Due date is : " + creationDate );
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE, MMMM");
                             String[] dateParts = simpleDateFormat.format(s.getTime()).split(", ");
                             String dayName = dateParts[0];
@@ -67,7 +82,6 @@ public class CreateTaskActivity extends AppCompatActivity {
                         },
                           2022,8,25);
         dialog.show();
-
     }
 
     void showPickTimeDialog(){
@@ -75,14 +89,14 @@ public class CreateTaskActivity extends AppCompatActivity {
                 (view1, hourOfDay, minute) -> {
                     String time = hourOfDay + ":" + minute;
                     taskDue.setHour(time);
+                    binding.etPickDueDate.setText(taskDue.toString());
                 }, mHour, mMinute, false);
         timePickerDialog.show();
     }
 
     void getTaskData(){
         taskTitle = binding.etTaskTitle.getText().toString();
-        taskSubtitle = "subtitle";
-        int taskPriority = 1;
+        taskSubtitle = binding.etTaskSubtitle.getText().toString();
     }
 
     void saveTask(){
@@ -93,8 +107,7 @@ public class CreateTaskActivity extends AppCompatActivity {
         task.setTaskSubtitle(taskSubtitle);
         task.setCreationDate(creationDate);
         task.setTaskName(taskTitle);
-        task.setPriority(1);
-
+        task.setPriority(selectedPriority);
         new Thread(() -> NotesDatabase.getInstance(getApplicationContext()).taskDao().insertTask(task)).start();
 
     }

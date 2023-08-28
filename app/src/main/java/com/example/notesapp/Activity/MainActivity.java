@@ -34,6 +34,7 @@ import com.example.notesapp.Model.Category;
 import com.example.notesapp.Model.Note;
 import com.example.notesapp.R;
 import com.example.notesapp.Repository.CategoryRepository;
+import com.example.notesapp.Repository.NotesRepository;
 import com.example.notesapp.adapters.NotesAdapter;
 import com.example.notesapp.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
@@ -47,14 +48,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     DrawerLayout drawerLayout;
     NotesAdapter notesAdapter;
     private AlertDialog dialogConfirmNote;
-
     boolean fabClicked;
     public static final int REQUEST_CODE_UPDATE_NOTE = 1;
     private Animation rotateOpenAnim ;
     private Animation rotateCloseAnim ;
-
     private Animation toBottomAnim  ;
     private Animation fromBottomAnim ;
+    SubMenu labelsSubMenu;
+    NotesRepository notesRepository;
     ActivityResultLauncher<Intent> speechResultLauncher;
     CategoryRepository categoryRepository ;
     @Override
@@ -62,8 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
-        showConfirmNoteDialog("Hey Google!");
-
+        notesRepository = new NotesRepository(this);
         speechResultLauncher  = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -73,28 +73,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         String recognizedSpeech = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0);
                         System.out.println("The Recognized speech is : "
                                 +recognizedSpeech);
+                        showConfirmNoteDialog(recognizedSpeech);
 
                     }
                 });
-
 
         fromBottomAnim =  AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim);
         toBottomAnim  = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
         rotateCloseAnim =  AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim);
         rotateOpenAnim =  AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim);
 
-
         categoryRepository = new CategoryRepository(this);
         mainBinding.fabAddNote.setOnClickListener(view ->
                 startActivity(new Intent(getApplicationContext(), CreateNoteActivity.class)));
         initializeFloatingActionButtons();
         initializeDrawerLayout();
-        String category = "Health";
-        Category category1 = new Category();
-        category1.setCategoryName(category);
 
-
-//        new Thread(() -> NotesDatabase.getInstance(getApplicationContext()).categoryDao().insertCategory(category1)).start();
     }
 
     @Override
@@ -111,30 +105,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         mainBinding.fabWriteNote.setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), CreateNoteActivity.class)));
-        mainBinding.fabASRNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-EG");
-                intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 5);
-                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Start Speaking...");
-                speechResultLauncher.launch(intent);
-            }
+        mainBinding.fabASRNote.setOnClickListener(view -> {
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-EG");
+            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 5);
+            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,10)
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Start Speaking...");
+            speechResultLauncher.launch(intent);
         });
-        mainBinding.imageAddNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, CreateTaskActivity.class));
-            }
-        });
-        mainBinding.fabAttachVoiceNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "VN", Toast.LENGTH_SHORT).show();
 
-            }
-        });
+        mainBinding.imageAddNote.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, CreateTaskActivity.class)));
+        mainBinding.fabAttachVoiceNote.setOnClickListener(view -> Toast.makeText(MainActivity.this, "VN", Toast.LENGTH_SHORT).show());
     }
 
     private void fabAddNoteClicked() {
@@ -192,14 +174,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Menu menu = navigationView.getMenu();
 
         MenuItem labelsItem = menu.findItem(R.id.categories_submenu);
-        SubMenu labelsSubmenu = labelsItem.getSubMenu();
-        labelsSubmenu.clear();
+        labelsSubMenu = labelsItem.getSubMenu();
+        labelsSubMenu.clear();
 
 
         for (String categoryName : categoryRepository.getCategoriesNames() ) {
-            labelsSubmenu.add(categoryName);
-            labelsSubmenu.setIcon(R.drawable.baseline_category_24);
-            labelsSubmenu.getItem().setIcon(R.drawable.baseline_category_24);
+            labelsSubMenu.add(categoryName);
+            labelsSubMenu.setIcon(R.drawable.baseline_category_24);
+            System.out.println("Labels sub menu : " + labelsSubMenu.getItem(0).getItemId());
+            labelsSubMenu.getItem().setIcon(R.drawable.baseline_category_24);
         }
     }
     private void initializeDrawerLayout(){
@@ -267,7 +250,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             et_confirmNote.setText(noteText);
             view.findViewById(R.id.textConfirm).setOnClickListener(view1 -> {
                 Note note = new Note();
-                note.setNoteText(noteText);
                 Toast.makeText(this, "Note Saved!", Toast.LENGTH_SHORT).show();
                 dialogConfirmNote.dismiss();
             });
@@ -279,6 +261,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        List<String> categories = categoryRepository.getCategoriesNames();
+        String categoryName = item.getTitle().toString();
         if (item.getItemId() == R.id.nav_archive) {
             navigationView.setCheckedItem(R.id.nav_archive);
             Intent intent = new Intent(MainActivity.this, CategoryNotesActivity.class);
@@ -288,6 +272,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else if(item.getItemId() == R.id.nav_todo)
         {
             Intent intent = new Intent(MainActivity.this, ToDoListActivity.class);
+            startActivity(intent);
+        }
+        else if (categories.contains(item.getTitle().toString())){
+            System.out.println("this is category : " + categoryName );
+            Intent intent = new Intent(MainActivity.this, CategoryNotesActivity.class);
+            intent.putExtra("category", categoryName);
             startActivity(intent);
         }
         drawerLayout.closeDrawer(GravityCompat.START);

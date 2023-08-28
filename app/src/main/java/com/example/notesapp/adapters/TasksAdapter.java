@@ -88,12 +88,11 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
             dayName.setText(task.getCompletionDate().getDayName());
             dueTime.setText(task.getCompletionDate().getHour());
             if (task.isCompleted()){
-                setTaskCompleted.setVisibility(View.INVISIBLE);
+                setTaskCompleted.setImageResource(R.drawable.ic_task);
                 status.setText("Completed");
             }
             else
             {
-                setTaskCompleted.setVisibility(View.VISIBLE);
                 status.setText("Not Completed");
             }
         }
