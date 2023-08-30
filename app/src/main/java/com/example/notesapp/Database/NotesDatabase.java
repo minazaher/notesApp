@@ -18,10 +18,21 @@ import com.example.notesapp.dao.CategoryDao;
 import com.example.notesapp.dao.NoteDao;
 import com.example.notesapp.dao.TaskDao;
 
-@Database(entities = {Category.class, Note.class, Task.class},version = 7, exportSchema = false )
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+@Database(entities = {Category.class, Note.class, Task.class},version = 8, exportSchema = false )
 @TypeConverters(mConverters.class)
 public abstract class NotesDatabase extends RoomDatabase {
     private static NotesDatabase notesDatabase;
+    // get a reference to a Context object
+
+    public static String DB_FILEPATH = "/data/data/com.example.notesapp/databases/database.db";
+
 
     public static RoomDatabase.Callback myCallback = new Callback() {
         @Override
@@ -44,6 +55,19 @@ public abstract class NotesDatabase extends RoomDatabase {
             ).fallbackToDestructiveMigration().addCallback(myCallback).build();
         }
         return notesDatabase;
+    }
+
+
+    public boolean exportDatabase(String dbPath) throws IOException {
+        close();
+        File newDb = new File(dbPath);
+        File oldDb = new File(DB_FILEPATH);
+        if (newDb.exists()) {
+            FileUtils.copyFile(newDb, oldDb);
+            getOpenHelper().getWritableDatabase().close();
+            return true;
+        }
+        return false;
     }
 
     public abstract NoteDao noteDao();

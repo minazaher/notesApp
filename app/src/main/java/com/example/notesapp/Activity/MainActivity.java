@@ -9,15 +9,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+import androidx.room.Room;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.util.Patterns;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,7 +32,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.notesapp.AsyncTasks.GetAllNotesTask;
-import com.example.notesapp.Model.Category;
+import com.example.notesapp.Database.NotesDatabase;
 import com.example.notesapp.Model.Note;
 import com.example.notesapp.R;
 import com.example.notesapp.Repository.CategoryRepository;
@@ -39,13 +41,19 @@ import com.example.notesapp.adapters.NotesAdapter;
 import com.example.notesapp.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+
+import de.raphaelebner.roomdatabasebackup.core.RoomBackup;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     ActivityMainBinding mainBinding;
     NavigationView navigationView;
     DrawerLayout drawerLayout;
+    final String SECRET_PASSWORD = "verySecretEncryptionKey";
+
     NotesAdapter notesAdapter;
     private AlertDialog dialogConfirmNote;
     boolean fabClicked;
@@ -58,11 +66,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NotesRepository notesRepository;
     ActivityResultLauncher<Intent> speechResultLauncher;
     CategoryRepository categoryRepository ;
+
+    RoomBackup roomBackup ;;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
+        roomBackup= new RoomBackup(MainActivity.this);
         notesRepository = new NotesRepository(this);
         speechResultLauncher  = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -77,17 +88,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     }
                 });
-
+        System.out.println("package name is :" +getApplicationContext().getPackageName());
         fromBottomAnim =  AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim);
         toBottomAnim  = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
         rotateCloseAnim =  AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim);
         rotateOpenAnim =  AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim);
-
+mainBinding.imageBackup.setOnClickListener(view -> {
+    roomBackup.backupLocation(RoomBackup.BACKUP_FILE_LOCATION_CUSTOM_FILE);
+    roomBackup.backupLocationCustomFile(new File(getFilesDir()+"/databasebackup/geilesBackup.sqlite3\""));
+    roomBackup.database(NotesDatabase.getInstance(getApplicationContext()));
+    roomBackup.enableLogDebug(true);
+    roomBackup.backupIsEncrypted(true);
+    System.out.println(RoomBackup.BACKUP_FILE_LOCATION_EXTERNAL);
+    roomBackup.customEncryptPassword(SECRET_PASSWORD);
+    roomBackup.onCompleteListener((success, message, exitCode) -> {
+        System.out.println("oncomplete: " + success + ", message: " + message + ", exitCode: " + exitCode);
+        if (success)
+            roomBackup.restartApp(new Intent(getApplicationContext(), MainActivity.class));
+        else
+            Toast.makeText(getApplicationContext(), "error", Toast.LENGTH_SHORT).show();
+    });
+    roomBackup.backup();
+});
+    mainBinding.imageAddChangeTheme.setOnClickListener(view -> {
+        roomBackup.backupLocation(RoomBackup.BACKUP_FILE_LOCATION_CUSTOM_FILE);
+        roomBackup.backupLocationCustomFile(new File(getFilesDir()+"/databasebackup/geilesBackup.sqlite3\""));
+        roomBackup.database(NotesDatabase.getInstance(getApplicationContext()));
+        roomBackup.enableLogDebug(true);
+        roomBackup.backupIsEncrypted(true);
+        roomBackup.customEncryptPassword(SECRET_PASSWORD);
+        roomBackup.onCompleteListener((success, message, exitCode) -> {
+            System.out.println("oncomplete: " + success + ", message: " + message + ", exitCode: " + exitCode);
+            if (success)
+                roomBackup.restartApp(new Intent(getApplicationContext(), MainActivity.class));
+        });
+        roomBackup.restore();
+    });
         categoryRepository = new CategoryRepository(this);
         mainBinding.fabAddNote.setOnClickListener(view ->
                 startActivity(new Intent(getApplicationContext(), CreateNoteActivity.class)));
         initializeFloatingActionButtons();
         initializeDrawerLayout();
+
+    }
+
+    public void backupDatabase(){
 
     }
 
@@ -100,9 +145,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initializeFloatingActionButtons(){
-        mainBinding.fabAddNote.setOnClickListener(view -> {
-            fabAddNoteClicked();
-        });
+        mainBinding.fabAddNote.setOnClickListener(view -> fabAddNoteClicked());
 
         mainBinding.fabWriteNote.setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), CreateNoteActivity.class)));
         mainBinding.fabASRNote.setOnClickListener(view -> {
@@ -110,12 +153,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-EG");
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 5);
-            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,10)
+            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,10);
             intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Start Speaking...");
             speechResultLauncher.launch(intent);
         });
 
-        mainBinding.imageAddNote.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, CreateTaskActivity.class)));
+        mainBinding.imageAddTask.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, CreateTaskActivity.class)));
         mainBinding.fabAttachVoiceNote.setOnClickListener(view -> Toast.makeText(MainActivity.this, "VN", Toast.LENGTH_SHORT).show());
     }
 
@@ -249,11 +292,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             EditText et_confirmNote = view.findViewById(R.id.et_confirmNote);
             et_confirmNote.setText(noteText);
             view.findViewById(R.id.textConfirm).setOnClickListener(view1 -> {
-                Note note = new Note();
+                Note note = new Note(noteText);
+                notesRepository.insertNote(note);
                 Toast.makeText(this, "Note Saved!", Toast.LENGTH_SHORT).show();
                 dialogConfirmNote.dismiss();
             });
-
             view.findViewById(R.id.textNoConfirm).setOnClickListener(view12 -> dialogConfirmNote.dismiss());
         }
         dialogConfirmNote.show();
@@ -262,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         List<String> categories = categoryRepository.getCategoriesNames();
-        String categoryName = item.getTitle().toString();
+        String categoryName = Objects.requireNonNull(item.getTitle()).toString();
         if (item.getItemId() == R.id.nav_archive) {
             navigationView.setCheckedItem(R.id.nav_archive);
             Intent intent = new Intent(MainActivity.this, CategoryNotesActivity.class);

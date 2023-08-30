@@ -12,7 +12,8 @@ public class Task {
     private String taskSubtitle;
     private boolean isCompleted;
     private String creationDate;
-    private TaskDate completionDate;
+    private TaskDate dueDate;
+    private String completionDate;
 
     public Task() {
     }
@@ -58,11 +59,19 @@ public class Task {
         this.creationDate = creationDate;
     }
 
-    public TaskDate getCompletionDate() {
+    public TaskDate getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(TaskDate dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public String getCompletionDate() {
         return completionDate;
     }
 
-    public void setCompletionDate(TaskDate completionDate) {
+    public void setCompletionDate(String completionDate) {
         this.completionDate = completionDate;
     }
 

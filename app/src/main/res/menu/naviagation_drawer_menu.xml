@@ -7,12 +7,12 @@
         android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
-            android:icon="@drawable/ic_archive"
+            android:icon="@drawable/ic_note"
             android:iconTint="@color/white"
             android:title="@string/notes"/>
         <item
             android:id="@+id/nav_todo"
-            android:icon="@drawable/ic_archive"
+            android:icon="@drawable/ic_todo"
             android:title="@string/to_do_list"/>
     </group>
 

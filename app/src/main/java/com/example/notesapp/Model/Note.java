@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
@@ -40,6 +41,9 @@ public class Note implements Serializable {
     private String webLink;
     private String location;
 
+    public Note() {
+    }
+@Ignore
     public Note(String noteText) {
         this.noteText = noteText;
         title = "NONE";

@@ -1,5 +1,6 @@
 package com.example.notesapp.adapters;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +14,10 @@ import com.example.notesapp.Model.Task;
 import com.example.notesapp.R;
 import com.example.notesapp.Repository.TaskRepository;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHolder> {
     List<Task> tasks;
@@ -52,10 +56,17 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
         holder.setTaskCompleted.setOnClickListener(view -> {
             if(!tasks.get(position).isCompleted()){
                 tasks.get(position).setCompleted(true);
+                tasks.get(position).setCreationDate(new SimpleDateFormat("EEEE, dd MMMM, yyyy HH:mm a ", Locale.getDefault())
+                        .format(new Date()));
                 taskRepository.updateTask(tasks.get(position));
                 this.onItemUpdated.onTaskUpdated(tasks.get(position));
                 this.notifyDataSetChanged();
             }
+            holder.itemView.setOnLongClickListener(view1 -> {
+                System.out.println("Long Clicked!");
+                return true;
+            });
+
         });
     }
 
@@ -83,13 +94,14 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
         public void setTask(Task task){
             title.setText(task.getTaskName());
             subtitle.setText(task.getTaskSubtitle());
-            month.setText(task.getCompletionDate().getMonth());
-            dayNumber.setText(task.getCompletionDate().getDayNumber());
-            dayName.setText(task.getCompletionDate().getDayName());
-            dueTime.setText(task.getCompletionDate().getHour());
+            month.setText(task.getDueDate().getMonth());
+            dayNumber.setText(task.getDueDate().getDayNumber());
+            dayName.setText(task.getDueDate().getDayName());
+            dueTime.setText(task.getDueDate().getHour());
             if (task.isCompleted()){
                 setTaskCompleted.setImageResource(R.drawable.ic_task);
                 status.setText("Completed");
+                status.setTextColor(Color.parseColor("#4CAF50"));
             }
             else
             {

@@ -18,6 +18,22 @@ public class NotesRepository {
         mContextRef = new WeakReference<>(context);
     }
 
+    public void insertNote(Note note){
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                NotesDatabase.getInstance(mContextRef.get()).noteDao().insertNote(note);
+            }
+        });
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
     public ArrayList<Note> getArchivedNotes(){
         ArrayList<Note> archivedNotes = new ArrayList<>();
         Thread getArchived = new Thread(() -> archivedNotes.addAll(NotesDatabase.getInstance(mContextRef.get()).noteDao().getArchivedNotes()));

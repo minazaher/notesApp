@@ -102,7 +102,8 @@ public class CreateTaskActivity extends AppCompatActivity {
     void saveTask(){
         getTaskData();
         Task task = new Task();
-        task.setCompletionDate(taskDue);
+        task.setDueDate(taskDue);
+        task.setCompletionDate("null");
         task.setCompleted(false);
         task.setTaskSubtitle(taskSubtitle);
         task.setCreationDate(creationDate);
