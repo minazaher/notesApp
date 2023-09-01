@@ -38,4 +38,15 @@ public class CredentialRepository {
         }
         return allCredentials;
     }
+
+    public void removeCredential(Credential credential) {
+        Thread insertCred = new Thread(() ->
+                NotesDatabase.getInstance(mContextRef.get()).credentialDao().deleteCredential(credential));
+        insertCred.start();
+        try {
+            insertCred.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

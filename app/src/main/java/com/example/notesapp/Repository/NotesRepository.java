@@ -19,12 +19,7 @@ public class NotesRepository {
     }
 
     public void insertNote(Note note){
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                NotesDatabase.getInstance(mContextRef.get()).noteDao().insertNote(note);
-            }
-        });
+        Thread thread = new Thread(() -> NotesDatabase.getInstance(mContextRef.get()).noteDao().insertNote(note));
         thread.start();
         try {
             thread.join();

@@ -4,25 +4,62 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.notesapp.Model.Note;
 import com.example.notesapp.Model.Task;
 import com.example.notesapp.R;
 import com.example.notesapp.Repository.TaskRepository;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHolder> {
+public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHolder> implements Filterable {
     List<Task> tasks;
     TaskRepository taskRepository;
     onItemUpdated onItemUpdated;
+    private List<Task> orig;
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                final FilterResults oReturn = new FilterResults();
+                final List<Task> results = new ArrayList<Task>();
+                if (orig == null)
+                    orig = tasks;
+                if (constraint != null) {
+                    if (orig != null & orig.size() > 0) {
+                        for (final Task g : orig) {
+                            if (isTaskContains(g,constraint.toString()))
+                                results.add(g);
+                        }
+                    }
+                    oReturn.values = results;
+                }
+                return oReturn;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                tasks = (ArrayList<Task>) results.values;
+                notifyDataSetChanged();
+
+            }
+        };
+
+    }
+
     public interface onItemUpdated{
         void onTaskUpdated(Task task);
     }
@@ -68,6 +105,12 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
             });
 
         });
+    }
+
+    private boolean isTaskContains(Task task, String word){
+        return task.getTaskName().toLowerCase().contains(word.toLowerCase()) ||
+                task.getTaskSubtitle().toLowerCase().contains(word.toLowerCase());
+
     }
 
     @Override

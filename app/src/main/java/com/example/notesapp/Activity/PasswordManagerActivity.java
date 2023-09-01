@@ -5,15 +5,18 @@ import static androidx.recyclerview.widget.RecyclerView.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +24,15 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.notesapp.Model.Credential;
+import com.example.notesapp.Model.Task;
 import com.example.notesapp.R;
 import com.example.notesapp.Repository.CredentialRepository;
 import com.example.notesapp.adapters.CredentialAdapter;
+import com.example.notesapp.adapters.TasksAdapter;
 import com.example.notesapp.databinding.ActivityPasswordManagerBinding;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 public class PasswordManagerActivity extends AppCompatActivity {
@@ -34,8 +41,8 @@ public class PasswordManagerActivity extends AppCompatActivity {
     CredentialRepository credentialRepository;
     BiometricPrompt biometricPrompt;
     BiometricPrompt.PromptInfo promptInfo;
-
-
+    CredentialAdapter credentialAdapter;
+    List<Credential> credentialList;
     @SuppressLint("SwitchIntDef")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +51,77 @@ public class PasswordManagerActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         credentialRepository = new CredentialRepository(this);
 
-        // Initializing Fingerprint Auth
+        initializeFingerprintAuthentication();
+        initializeCredentialsRecyclerView();
+
+        binding.etSearchPasswords.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                credentialAdapter.getFilter().filter(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (TextUtils.isEmpty ( newText ) ) {
+                    credentialAdapter.getFilter().filter("");
+                } else {
+                    credentialAdapter.getFilter().filter(newText.toString());
+                }
+                return true;
+            }
+    });
+    }
+
+    void initializeItemHelperForCredentials(RecyclerView recyclerView, CredentialAdapter adapter){
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback =
+                new ItemTouchHelper.SimpleCallback(0,
+                        ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+                    @Override
+                    public boolean onMove(@NonNull RecyclerView recyclerView,
+                                          RecyclerView.ViewHolder viewHolder,
+                                          RecyclerView.ViewHolder target) {
+                        return false;
+                    }
+                    @Override
+                    public void onSwiped(RecyclerView.ViewHolder viewHolder,
+                                         int swipeDir) {
+                        int position = viewHolder.getAdapterPosition();
+                        Credential credential = adapter.getCredentialList().get(position);
+                        credentialRepository.removeCredential(credential);
+                        adapter.updateData((ArrayList<Credential>) credentialRepository.getAllCredentials());
+                    }
+                };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+    }
+
+    private void initializeCredentialsRecyclerView(){
+        credentialList = credentialRepository.getAllCredentials();
+        credentialAdapter = new CredentialAdapter(credentialList);
+        binding.credentialsRecyclerView.setAdapter(credentialAdapter);
+        binding.credentialsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,
+                false));
+        binding.fabAddCredential.setOnClickListener(view -> showAddCredentialDialog());
+        binding.credentialsRecyclerView.addOnScrollListener(new OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0 || dy < 0 && binding.fabAddCredential.isShown())
+                    binding.fabAddCredential.hide();
+            }
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState == SCROLL_STATE_IDLE)
+                    binding.fabAddCredential.show();
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
+
+        initializeItemHelperForCredentials(binding.credentialsRecyclerView, credentialAdapter);
+    }
+    private void initializeFingerprintAuthentication(){
+
         BiometricManager biometricManager = BiometricManager.from(this);
 
         switch ((biometricManager.canAuthenticate())) {
@@ -85,29 +162,6 @@ public class PasswordManagerActivity extends AppCompatActivity {
                 .setDescription("Authenticate to view your passwords please").setDeviceCredentialAllowed(true).build();
         biometricPrompt.authenticate(promptInfo);
 
-        CredentialAdapter credentialAdapter = new CredentialAdapter(credentialRepository.getAllCredentials());
-        binding.credentialsRecyclerView.setAdapter(credentialAdapter);
-        binding.credentialsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,
-                false));
-
-        binding.fabAddCredential.setOnClickListener(view -> showAddCredentialDialog());
-
-        binding.credentialsRecyclerView.addOnScrollListener(new OnScrollListener() {
-
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 0 || dy < 0 && binding.fabAddCredential.isShown())
-                    binding.fabAddCredential.hide();
-            }
-
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                if (newState == SCROLL_STATE_IDLE)
-                    binding.fabAddCredential.show();
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-        });
-
     }
 
     private void showAddCredentialDialog(){
@@ -130,14 +184,19 @@ public class PasswordManagerActivity extends AppCompatActivity {
                 String appName = et_appName.getText().toString();
                 String email = et_email.getText().toString();
                 String password = et_password.getText().toString();
-                Credential credential = new Credential(email, password,appName,R.drawable.baseline_category_24);
+                if(appName.trim().isEmpty() || email.trim().isEmpty() || password.trim().isEmpty()){
+                    Toast.makeText(this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Credential credential = new Credential(email, password,appName,R.drawable.baseline_category_24);
                     credentialRepository.insertCredential(credential);
+                    credentialAdapter.updateData(credentialRepository.getAllCredentials());
                     addCredentialDialog.dismiss();
+                }
             });
-
             view.findViewById(R.id.textCancelCredential).setOnClickListener(view12 -> addCredentialDialog.dismiss());
-        }
-        addCredentialDialog.show();
-    }
+            addCredentialDialog.show();
 
+        }
+    }
 }

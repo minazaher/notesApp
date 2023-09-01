@@ -21,7 +21,8 @@
             android:title="@string/password_manager"/>
     </group>
 
-    <item android:title="@string/categories" android:id="@+id/categories_submenu">
+    <item android:title="@string/categories"
+        android:id="@+id/categories_submenu">
         <menu>
 
         </menu>

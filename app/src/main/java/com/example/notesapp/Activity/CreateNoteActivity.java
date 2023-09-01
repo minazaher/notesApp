@@ -1,6 +1,5 @@
 package com.example.notesapp.Activity;
 
-import static com.example.notesapp.R.style.ColorPickerDialog_Dark;
 
 import android.Manifest;
 import android.content.ContentUris;
@@ -318,7 +317,6 @@ public class CreateNoteActivity extends AppCompatActivity{
                 .withAlphaEnabled(true)
                 .withTitle("Pick Your Note Color")
                 .withCornerRadius(5.0F)
-                .withTheme(ColorPickerDialog_Dark)
                 .withListener((dialog, color) -> {
                     selectedNoteColor = String.format("#%06X", (0xFFFFFF & color));
                     setSubtitleIndicatorColor();

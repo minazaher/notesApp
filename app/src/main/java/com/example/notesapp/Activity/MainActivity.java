@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,6 +37,7 @@ import com.example.notesapp.AsyncTasks.GetAllNotesTask;
 import com.example.notesapp.Database.NotesDatabase;
 import com.example.notesapp.Model.Credential;
 import com.example.notesapp.Model.Note;
+import com.example.notesapp.Model.Task;
 import com.example.notesapp.R;
 import com.example.notesapp.Repository.CategoryRepository;
 import com.example.notesapp.Repository.CredentialRepository;
@@ -43,9 +45,14 @@ import com.example.notesapp.Repository.NotesRepository;
 import com.example.notesapp.adapters.NotesAdapter;
 import com.example.notesapp.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import de.raphaelebner.roomdatabasebackup.core.RoomBackup;
@@ -74,11 +81,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
-
         roomBackup = new RoomBackup(MainActivity.this);
-        notesRepository = new NotesRepository(this);
+        initializeAnimation();
+
+        mainBinding.imageBackup.setOnClickListener(view -> {
+            showSnackbar(mainBinding.getRoot(), "You want to backup your data?", "Confirm", view12 -> saveLocalBackup());
+        });
+        mainBinding.imageLoadBackup.setOnClickListener(view -> {
+            showSnackbar(mainBinding.getRoot(), "You want to restore your local data?", "Restore Now", view1 -> restoreLocalBackup());
+        });
+        categoryRepository = new CategoryRepository(this);
+        mainBinding.fabAddNote.setOnClickListener(view ->
+                startActivity(new Intent(getApplicationContext(), CreateNoteActivity.class)));
+        initializeFloatingActionButtons();
+        initializeDrawerLayout();
         speechResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -91,54 +107,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         showConfirmNoteDialog(recognizedSpeech);
                     }
                 });
-        System.out.println("package name is :" + getApplicationContext().getPackageName());
-        fromBottomAnim = AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim);
-        toBottomAnim = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
-        rotateCloseAnim = AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim);
-        rotateOpenAnim = AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim);
-        mainBinding.imageBackup.setOnClickListener(view -> {
-            roomBackup.backupLocation(RoomBackup.BACKUP_FILE_LOCATION_CUSTOM_FILE);
-            roomBackup.backupLocationCustomFile(new File(getFilesDir() + "/databasebackup/NoteyBackup.sqlite3"));
-            roomBackup.database(NotesDatabase.getInstance(getApplicationContext()));
-            roomBackup.enableLogDebug(true);
-            roomBackup.backupIsEncrypted(true);
-            System.out.println(RoomBackup.BACKUP_FILE_LOCATION_EXTERNAL);
-            roomBackup.customEncryptPassword(SECRET_PASSWORD);
-            roomBackup.onCompleteListener((success, message, exitCode) -> {
-                System.out.println("oncomplete: " + success + ", message: " + message + ", exitCode: " + exitCode);
-                if (success){
-                    Toast.makeText(this, "Backup Completed Successfully!", Toast.LENGTH_SHORT).show();
-                    roomBackup.restartApp(new Intent(getApplicationContext(), MainActivity.class));
-                }
-                else
-                    Toast.makeText(getApplicationContext(), "Error Backing up", Toast.LENGTH_SHORT).show();
-            });
-            roomBackup.backup();
-        });
-        mainBinding.imageAddChangeTheme.setOnClickListener(view -> {
-            roomBackup.backupLocation(RoomBackup.BACKUP_FILE_LOCATION_CUSTOM_FILE);
-            roomBackup.backupLocationCustomFile(new File(getFilesDir() + "/databasebackup/NoteyBackup.sqlite3"));
-            roomBackup.database(NotesDatabase.getInstance(getApplicationContext()));
-            roomBackup.enableLogDebug(true);
-            roomBackup.backupIsEncrypted(true);
-            roomBackup.customEncryptPassword(SECRET_PASSWORD);
-            roomBackup.onCompleteListener((success, message, exitCode) -> {
-                if (success){
-                    Toast.makeText(this, "Backup Restored Successfully!", Toast.LENGTH_SHORT).show();
-                    roomBackup.restartApp(new Intent(getApplicationContext(), MainActivity.class));
-                }
-                else
-                    Toast.makeText(this, "Error Restoring the Data!", Toast.LENGTH_SHORT).show();
-
-            });
-            roomBackup.restore();
-        });
-        categoryRepository = new CategoryRepository(this);
-        mainBinding.fabAddNote.setOnClickListener(view ->
-                startActivity(new Intent(getApplicationContext(), CreateNoteActivity.class)));
-        initializeFloatingActionButtons();
-        initializeDrawerLayout();
-
     }
 
     @Override
@@ -147,6 +115,57 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getNotes();
         initializeCategories();
 
+    }
+
+    private void initializeAnimation(){
+        fromBottomAnim = AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim);
+        toBottomAnim = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
+        rotateCloseAnim = AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim);
+        rotateOpenAnim = AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim);
+    }
+    private void saveLocalBackup(){
+        roomBackup.backupLocation(RoomBackup.BACKUP_FILE_LOCATION_CUSTOM_FILE);
+        roomBackup.backupLocationCustomFile(new File(getFilesDir() + "/databasebackup/NoteyBackup.sqlite3"));
+        roomBackup.database(NotesDatabase.getInstance(getApplicationContext()));
+        roomBackup.enableLogDebug(true);
+        roomBackup.backupIsEncrypted(true);
+        System.out.println(RoomBackup.BACKUP_FILE_LOCATION_EXTERNAL);
+        roomBackup.customEncryptPassword(SECRET_PASSWORD);
+        roomBackup.onCompleteListener((success, message, exitCode) -> {
+            if (success){
+                Toast.makeText(MainActivity.this, "Backup Completed Successfully!", Toast.LENGTH_SHORT).show();
+                roomBackup.restartApp(new Intent(getApplicationContext(), MainActivity.class));
+            }
+            else
+                Toast.makeText(getApplicationContext(), "Error Backing up", Toast.LENGTH_SHORT).show();
+        });
+        roomBackup.backup();
+    }
+    private void restoreLocalBackup(){
+        roomBackup.backupLocation(RoomBackup.BACKUP_FILE_LOCATION_CUSTOM_FILE);
+        roomBackup.backupLocationCustomFile(new File(getFilesDir() + "/databasebackup/NoteyBackup.sqlite3"));
+        roomBackup.database(NotesDatabase.getInstance(getApplicationContext()));
+        roomBackup.enableLogDebug(true);
+        roomBackup.backupIsEncrypted(true);
+        roomBackup.customEncryptPassword(SECRET_PASSWORD);
+        roomBackup.onCompleteListener((success, message, exitCode) -> {
+            if (success){
+                Toast.makeText(this, "Backup Restored Successfully!", Toast.LENGTH_SHORT).show();
+                roomBackup.restartApp(new Intent(getApplicationContext(), MainActivity.class));
+            }
+            else
+                Toast.makeText(this, "Error Restoring the Data!", Toast.LENGTH_SHORT).show();
+
+        });
+        roomBackup.restore();
+    }
+
+    public void showSnackbar(View view, String message, String actionLabel, View.OnClickListener actionListener) {
+        Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+        if (actionLabel != null && actionListener != null) {
+            snackbar.setAction(actionLabel, actionListener);
+        }
+        snackbar.show();
     }
 
     private void initializeFloatingActionButtons() {
@@ -164,7 +183,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         mainBinding.imageAddTask.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, CreateTaskActivity.class)));
-        mainBinding.fabAttachVoiceNote.setOnClickListener(view -> Toast.makeText(MainActivity.this, "VN", Toast.LENGTH_SHORT).show());
     }
 
     private void fabAddNoteClicked() {
@@ -178,23 +196,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!clicked) {
             mainBinding.fabWriteNote.setClickable(true);
             mainBinding.fabASRNote.setClickable(true);
-            mainBinding.fabAttachVoiceNote.setClickable(true);
         } else {
             mainBinding.fabWriteNote.setClickable(false);
             mainBinding.fabASRNote.setClickable(false);
-            mainBinding.fabAttachVoiceNote.setClickable(false);
         }
     }
 
     private void setAnimation(boolean clicked) {
         if (!clicked) {
             mainBinding.fabAddNote.setAnimation(rotateOpenAnim);
-            mainBinding.fabAttachVoiceNote.setAnimation(fromBottomAnim);
             mainBinding.fabWriteNote.setAnimation(fromBottomAnim);
             mainBinding.fabASRNote.setAnimation(fromBottomAnim);
         } else {
             mainBinding.fabAddNote.setAnimation(rotateCloseAnim);
-            mainBinding.fabAttachVoiceNote.setAnimation(toBottomAnim);
             mainBinding.fabWriteNote.setAnimation(toBottomAnim);
             mainBinding.fabASRNote.setAnimation(toBottomAnim);
         }
@@ -202,11 +216,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setVisibility(boolean clicked) {
         if (!clicked) {
-            mainBinding.fabAttachVoiceNote.setVisibility(View.VISIBLE);
             mainBinding.fabWriteNote.setVisibility(View.VISIBLE);
             mainBinding.fabASRNote.setVisibility(View.VISIBLE);
         } else {
-            mainBinding.fabAttachVoiceNote.setVisibility(View.INVISIBLE);
             mainBinding.fabWriteNote.setVisibility(View.INVISIBLE);
             mainBinding.fabASRNote.setVisibility(View.INVISIBLE);
         }
@@ -263,20 +275,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 });
         getAllNotesTask.execute();
 
+        mainBinding.etSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                notesAdapter.getFilter().filter(query);
+                return true;
+            }
 
-//        mainBinding.etSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String s) {
-//                notesAdapter.searchNotes(s);
-//                return true;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String s) {
-//                notesAdapter.searchNotes(s);
-//                return true;
-//            }
-//        });
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (TextUtils.isEmpty ( newText ) ) {
+                    notesAdapter.getFilter().filter("");
+                } else {
+                    notesAdapter.getFilter().filter(newText.toString());
+                }
+                return true;
+            }
+        });
+
     }
 
     private void showConfirmNoteDialog(String noteText) {
@@ -291,13 +307,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             EditText et_confirmNote = view.findViewById(R.id.et_confirmNote);
             et_confirmNote.setText(noteText);
-            view.findViewById(R.id.textConfirm).setOnClickListener(view1 -> {
-                Note note = new Note(noteText);
-                notesRepository.insertNote(note);
-                Toast.makeText(this, "Note Saved!", Toast.LENGTH_SHORT).show();
+            String noteTime = new SimpleDateFormat("EEEE, dd MMMM, yyyy HH:mm a ", Locale.getDefault())
+                    .format(new Date()).toString();
+            view.findViewById(R.id.textConfirmASR).setOnClickListener(view1 -> {
+                Intent intent = new Intent(MainActivity.this, CreateNoteActivity.class);
+                intent.putExtra("isViewOrUpdate", true);
+                intent.putExtra("note", new Note(noteText, noteTime));
+                intent.putExtra("code", REQUEST_CODE_UPDATE_NOTE);
+                startActivity(intent);
                 dialogConfirmNote.dismiss();
             });
-            view.findViewById(R.id.textNoConfirm).setOnClickListener(view12 -> dialogConfirmNote.dismiss());
+            view.findViewById(R.id.textNoConfirmASR).setOnClickListener(view12 -> dialogConfirmNote.dismiss());
         }
         dialogConfirmNote.show();
     }
