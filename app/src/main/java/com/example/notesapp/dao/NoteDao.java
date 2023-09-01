@@ -9,6 +9,7 @@ import androidx.room.Transaction;
 
 import com.example.notesapp.Model.Note;
 
+import java.util.Collection;
 import java.util.List;
 
 @Dao
@@ -30,4 +31,7 @@ public interface NoteDao {
     @Query("Select * from notes where isArchived is 1")
     List<Note> getArchivedNotes();
 
+    @Query("Select * from notes where isFavourite is 1")
+
+    List<Note> getFavoriteNotes();
 }

@@ -22,12 +22,12 @@
         android:fitsSystemWindows="false"
         app:topInsetScrimEnabled="true"
         android:layout_gravity="start"
-        app:layout_constraintStart_toStartOf="parent"
-        app:theme="@style/NavigationDrawerSubheaderStyle" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <TextView
         android:id="@+id/tv_myNotes"
         android:layout_width="match_parent"
@@ -87,11 +87,11 @@
         android:layout_marginHorizontal="@dimen/_2sdp"
         android:clipChildren="false"
         android:paddingStart="0dp"
+        tools:listitem="@layout/note"
         android:paddingEnd="@dimen/_12sdp"
         android:paddingBottom="@dimen/_12sdp"
         app:layout_constraintBottom_toTopOf="@id/layout_quickActions"
         app:layout_constraintTop_toBottomOf="@id/layout_search"/>
-
     <LinearLayout
         android:id="@+id/layout_quickActions"
         android:layout_width="match_parent"
@@ -178,6 +178,7 @@
             android:clickable="false"
             android:focusable="true"
             app:maxImageSize="@dimen/_24sdp"
+            android:contentDescription="@string/app_name"
             android:backgroundTint="@color/colorAccent"
             android:background="@color/colorAccent"
             android:visibility="invisible"/>

@@ -6,8 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
     tools:context=".Activity.ToDoListActivity">
-
-
     <TextView
         android:id="@+id/tv_myTasks"
         android:layout_width="match_parent"

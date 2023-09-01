@@ -61,4 +61,17 @@ public class NotesRepository {
         return categoryNotes;
     }
 
+    public ArrayList<Note> getFavoriteNotes() {
+        ArrayList<Note> favoriteNotes = new ArrayList<>();
+        Thread getArchived = new Thread(() ->
+                favoriteNotes.addAll(NotesDatabase.getInstance(mContextRef.get()).noteDao().getFavoriteNotes()));
+        getArchived.start();
+        try {
+            getArchived.join();
+        } catch (InterruptedException e) {
+            Toast.makeText(mContextRef.get(), "Error! Try Again Later", Toast.LENGTH_SHORT).show();
+            throw new RuntimeException(e);
+        }
+        return favoriteNotes;
+    }
 }

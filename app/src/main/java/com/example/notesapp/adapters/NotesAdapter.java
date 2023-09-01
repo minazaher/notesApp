@@ -46,7 +46,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.Viewholder> 
     List<Note> noteSource;
 
     public NotesAdapter(List<Note> notes, NotesListener notesListener) {
-
         this.notes = notes;
         this.notesListener = notesListener;
         this.noteSource = notes;

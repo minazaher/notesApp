@@ -1,25 +1,13 @@
 package com.example.notesapp.Activity;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-import androidx.room.Room;
-
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,51 +19,67 @@ import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SearchView;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+
 import com.example.notesapp.AsyncTasks.GetAllNotesTask;
 import com.example.notesapp.Database.NotesDatabase;
+import com.example.notesapp.Model.Credential;
 import com.example.notesapp.Model.Note;
 import com.example.notesapp.R;
 import com.example.notesapp.Repository.CategoryRepository;
+import com.example.notesapp.Repository.CredentialRepository;
 import com.example.notesapp.Repository.NotesRepository;
 import com.example.notesapp.adapters.NotesAdapter;
 import com.example.notesapp.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
 import de.raphaelebner.roomdatabasebackup.core.RoomBackup;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    public static final int REQUEST_CODE_UPDATE_NOTE = 1;
+    final String SECRET_PASSWORD = "verySecretEncryptionKey";
     ActivityMainBinding mainBinding;
     NavigationView navigationView;
     DrawerLayout drawerLayout;
-    final String SECRET_PASSWORD = "verySecretEncryptionKey";
-
     NotesAdapter notesAdapter;
-    private AlertDialog dialogConfirmNote;
     boolean fabClicked;
-    public static final int REQUEST_CODE_UPDATE_NOTE = 1;
-    private Animation rotateOpenAnim ;
-    private Animation rotateCloseAnim ;
-    private Animation toBottomAnim  ;
-    private Animation fromBottomAnim ;
     SubMenu labelsSubMenu;
     NotesRepository notesRepository;
     ActivityResultLauncher<Intent> speechResultLauncher;
-    CategoryRepository categoryRepository ;
+    CategoryRepository categoryRepository;
+    RoomBackup roomBackup;
+    private AlertDialog dialogConfirmNote;
+    private Animation rotateOpenAnim;
+    private Animation rotateCloseAnim;
+    private Animation toBottomAnim;
+    private Animation fromBottomAnim;
 
-    RoomBackup roomBackup ;;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
-        roomBackup= new RoomBackup(MainActivity.this);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
+
+        roomBackup = new RoomBackup(MainActivity.this);
         notesRepository = new NotesRepository(this);
-        speechResultLauncher  = registerForActivityResult(
+        speechResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
@@ -83,56 +87,57 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         assert data != null;
                         String recognizedSpeech = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0);
                         System.out.println("The Recognized speech is : "
-                                +recognizedSpeech);
+                                + recognizedSpeech);
                         showConfirmNoteDialog(recognizedSpeech);
-
                     }
                 });
-        System.out.println("package name is :" +getApplicationContext().getPackageName());
-        fromBottomAnim =  AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim);
-        toBottomAnim  = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
-        rotateCloseAnim =  AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim);
-        rotateOpenAnim =  AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim);
-mainBinding.imageBackup.setOnClickListener(view -> {
-    roomBackup.backupLocation(RoomBackup.BACKUP_FILE_LOCATION_CUSTOM_FILE);
-    roomBackup.backupLocationCustomFile(new File(getFilesDir()+"/databasebackup/geilesBackup.sqlite3\""));
-    roomBackup.database(NotesDatabase.getInstance(getApplicationContext()));
-    roomBackup.enableLogDebug(true);
-    roomBackup.backupIsEncrypted(true);
-    System.out.println(RoomBackup.BACKUP_FILE_LOCATION_EXTERNAL);
-    roomBackup.customEncryptPassword(SECRET_PASSWORD);
-    roomBackup.onCompleteListener((success, message, exitCode) -> {
-        System.out.println("oncomplete: " + success + ", message: " + message + ", exitCode: " + exitCode);
-        if (success)
-            roomBackup.restartApp(new Intent(getApplicationContext(), MainActivity.class));
-        else
-            Toast.makeText(getApplicationContext(), "error", Toast.LENGTH_SHORT).show();
-    });
-    roomBackup.backup();
-});
-    mainBinding.imageAddChangeTheme.setOnClickListener(view -> {
-        roomBackup.backupLocation(RoomBackup.BACKUP_FILE_LOCATION_CUSTOM_FILE);
-        roomBackup.backupLocationCustomFile(new File(getFilesDir()+"/databasebackup/geilesBackup.sqlite3\""));
-        roomBackup.database(NotesDatabase.getInstance(getApplicationContext()));
-        roomBackup.enableLogDebug(true);
-        roomBackup.backupIsEncrypted(true);
-        roomBackup.customEncryptPassword(SECRET_PASSWORD);
-        roomBackup.onCompleteListener((success, message, exitCode) -> {
-            System.out.println("oncomplete: " + success + ", message: " + message + ", exitCode: " + exitCode);
-            if (success)
-                roomBackup.restartApp(new Intent(getApplicationContext(), MainActivity.class));
+        System.out.println("package name is :" + getApplicationContext().getPackageName());
+        fromBottomAnim = AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim);
+        toBottomAnim = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
+        rotateCloseAnim = AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim);
+        rotateOpenAnim = AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim);
+        mainBinding.imageBackup.setOnClickListener(view -> {
+            roomBackup.backupLocation(RoomBackup.BACKUP_FILE_LOCATION_CUSTOM_FILE);
+            roomBackup.backupLocationCustomFile(new File(getFilesDir() + "/databasebackup/NoteyBackup.sqlite3"));
+            roomBackup.database(NotesDatabase.getInstance(getApplicationContext()));
+            roomBackup.enableLogDebug(true);
+            roomBackup.backupIsEncrypted(true);
+            System.out.println(RoomBackup.BACKUP_FILE_LOCATION_EXTERNAL);
+            roomBackup.customEncryptPassword(SECRET_PASSWORD);
+            roomBackup.onCompleteListener((success, message, exitCode) -> {
+                System.out.println("oncomplete: " + success + ", message: " + message + ", exitCode: " + exitCode);
+                if (success){
+                    Toast.makeText(this, "Backup Completed Successfully!", Toast.LENGTH_SHORT).show();
+                    roomBackup.restartApp(new Intent(getApplicationContext(), MainActivity.class));
+                }
+                else
+                    Toast.makeText(getApplicationContext(), "Error Backing up", Toast.LENGTH_SHORT).show();
+            });
+            roomBackup.backup();
         });
-        roomBackup.restore();
-    });
+        mainBinding.imageAddChangeTheme.setOnClickListener(view -> {
+            roomBackup.backupLocation(RoomBackup.BACKUP_FILE_LOCATION_CUSTOM_FILE);
+            roomBackup.backupLocationCustomFile(new File(getFilesDir() + "/databasebackup/NoteyBackup.sqlite3"));
+            roomBackup.database(NotesDatabase.getInstance(getApplicationContext()));
+            roomBackup.enableLogDebug(true);
+            roomBackup.backupIsEncrypted(true);
+            roomBackup.customEncryptPassword(SECRET_PASSWORD);
+            roomBackup.onCompleteListener((success, message, exitCode) -> {
+                if (success){
+                    Toast.makeText(this, "Backup Restored Successfully!", Toast.LENGTH_SHORT).show();
+                    roomBackup.restartApp(new Intent(getApplicationContext(), MainActivity.class));
+                }
+                else
+                    Toast.makeText(this, "Error Restoring the Data!", Toast.LENGTH_SHORT).show();
+
+            });
+            roomBackup.restore();
+        });
         categoryRepository = new CategoryRepository(this);
         mainBinding.fabAddNote.setOnClickListener(view ->
                 startActivity(new Intent(getApplicationContext(), CreateNoteActivity.class)));
         initializeFloatingActionButtons();
         initializeDrawerLayout();
-
-    }
-
-    public void backupDatabase(){
 
     }
 
@@ -144,7 +149,7 @@ mainBinding.imageBackup.setOnClickListener(view -> {
 
     }
 
-    private void initializeFloatingActionButtons(){
+    private void initializeFloatingActionButtons() {
         mainBinding.fabAddNote.setOnClickListener(view -> fabAddNoteClicked());
 
         mainBinding.fabWriteNote.setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), CreateNoteActivity.class)));
@@ -153,7 +158,7 @@ mainBinding.imageBackup.setOnClickListener(view -> {
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-EG");
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 5);
-            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,10);
+            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 10);
             intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Start Speaking...");
             speechResultLauncher.launch(intent);
         });
@@ -170,13 +175,11 @@ mainBinding.imageBackup.setOnClickListener(view -> {
     }
 
     private void setClickability(boolean clicked) {
-        if(!clicked){
+        if (!clicked) {
             mainBinding.fabWriteNote.setClickable(true);
             mainBinding.fabASRNote.setClickable(true);
             mainBinding.fabAttachVoiceNote.setClickable(true);
-        }
-        else
-        {
+        } else {
             mainBinding.fabWriteNote.setClickable(false);
             mainBinding.fabASRNote.setClickable(false);
             mainBinding.fabAttachVoiceNote.setClickable(false);
@@ -184,14 +187,12 @@ mainBinding.imageBackup.setOnClickListener(view -> {
     }
 
     private void setAnimation(boolean clicked) {
-        if(!clicked){
+        if (!clicked) {
             mainBinding.fabAddNote.setAnimation(rotateOpenAnim);
             mainBinding.fabAttachVoiceNote.setAnimation(fromBottomAnim);
             mainBinding.fabWriteNote.setAnimation(fromBottomAnim);
             mainBinding.fabASRNote.setAnimation(fromBottomAnim);
-        }
-        else
-        {
+        } else {
             mainBinding.fabAddNote.setAnimation(rotateCloseAnim);
             mainBinding.fabAttachVoiceNote.setAnimation(toBottomAnim);
             mainBinding.fabWriteNote.setAnimation(toBottomAnim);
@@ -200,20 +201,18 @@ mainBinding.imageBackup.setOnClickListener(view -> {
     }
 
     private void setVisibility(boolean clicked) {
-        if(!clicked){
+        if (!clicked) {
             mainBinding.fabAttachVoiceNote.setVisibility(View.VISIBLE);
             mainBinding.fabWriteNote.setVisibility(View.VISIBLE);
             mainBinding.fabASRNote.setVisibility(View.VISIBLE);
-        }
-        else
-        {
+        } else {
             mainBinding.fabAttachVoiceNote.setVisibility(View.INVISIBLE);
             mainBinding.fabWriteNote.setVisibility(View.INVISIBLE);
             mainBinding.fabASRNote.setVisibility(View.INVISIBLE);
         }
     }
 
-    private void initializeCategories(){
+    private void initializeCategories() {
         Menu menu = navigationView.getMenu();
 
         MenuItem labelsItem = menu.findItem(R.id.categories_submenu);
@@ -221,21 +220,22 @@ mainBinding.imageBackup.setOnClickListener(view -> {
         labelsSubMenu.clear();
 
 
-        for (String categoryName : categoryRepository.getCategoriesNames() ) {
+        for (String categoryName : categoryRepository.getCategoriesNames()) {
             labelsSubMenu.add(categoryName);
             labelsSubMenu.setIcon(R.drawable.baseline_category_24);
             System.out.println("Labels sub menu : " + labelsSubMenu.getItem(0).getItemId());
             labelsSubMenu.getItem().setIcon(R.drawable.baseline_category_24);
         }
     }
-    private void initializeDrawerLayout(){
-            drawerLayout = mainBinding.drawerLayout;
-            navigationView = mainBinding.navView;
-            navigationView.bringToFront();
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open_drawer, R.string.close_drawer);
-            drawerLayout.addDrawerListener(toggle);
-            toggle.syncState();
-            navigationView.setNavigationItemSelectedListener(this);
+
+    private void initializeDrawerLayout() {
+        drawerLayout = mainBinding.drawerLayout;
+        navigationView = mainBinding.navView;
+        navigationView.bringToFront();
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open_drawer, R.string.close_drawer);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
@@ -253,7 +253,7 @@ mainBinding.imageBackup.setOnClickListener(view -> {
                 notes -> {
                     mainBinding.notesRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
                     notesAdapter = new NotesAdapter(notes, (note, position) -> {
-                        Intent intent = new Intent(MainActivity.this,CreateNoteActivity.class);
+                        Intent intent = new Intent(MainActivity.this, CreateNoteActivity.class);
                         intent.putExtra("isViewOrUpdate", true);
                         intent.putExtra("note", note);
                         intent.putExtra("code", REQUEST_CODE_UPDATE_NOTE);
@@ -300,7 +300,7 @@ mainBinding.imageBackup.setOnClickListener(view -> {
             view.findViewById(R.id.textNoConfirm).setOnClickListener(view12 -> dialogConfirmNote.dismiss());
         }
         dialogConfirmNote.show();
-        }
+    }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -311,14 +311,22 @@ mainBinding.imageBackup.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, CategoryNotesActivity.class);
             intent.putExtra("isArchived", true);
             startActivity(intent);
-        }
-        else if(item.getItemId() == R.id.nav_todo)
-        {
+        } else if (item.getItemId() == R.id.nav_todo) {
             Intent intent = new Intent(MainActivity.this, ToDoListActivity.class);
             startActivity(intent);
         }
-        else if (categories.contains(item.getTitle().toString())){
-            System.out.println("this is category : " + categoryName );
+        else if (item.getItemId() == R.id.nav_password_manager) {
+            Intent intent = new Intent(MainActivity.this, PasswordManagerActivity.class);
+            startActivity(intent);
+        }
+        if (item.getItemId() == R.id.nav_favorite) {
+            navigationView.setCheckedItem(R.id.nav_archive);
+            Intent intent = new Intent(MainActivity.this, CategoryNotesActivity.class);
+            intent.putExtra("isFavorite", true);
+            startActivity(intent);
+        }
+        else if (categories.contains(item.getTitle().toString())) {
+            System.out.println("this is category : " + categoryName);
             Intent intent = new Intent(MainActivity.this, CategoryNotesActivity.class);
             intent.putExtra("category", categoryName);
             startActivity(intent);
@@ -334,7 +342,6 @@ mainBinding.imageBackup.setOnClickListener(view -> {
                 new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
         if (activities.size() == 0) {
             mainBinding.fabASRNote.setVisibility(View.GONE);
-        }
-        else mainBinding.fabASRNote.setVisibility(View.VISIBLE);
+        } else mainBinding.fabASRNote.setVisibility(View.VISIBLE);
     }
 }

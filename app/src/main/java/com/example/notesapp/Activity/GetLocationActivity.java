@@ -40,6 +40,7 @@ public class GetLocationActivity extends AppCompatActivity implements MapFragmen
         tv_location.setText(getAddress(getUserLocation()));
         findViewById(R.id.btn_saveLocation).setOnClickListener(view -> {
             CreateNoteActivity.selectedLocation = tv_location.getText().toString();
+            CreateNoteActivity.setLocationText(tv_location.getText().toString());
             onBackPressed();
         });
         findViewById(R.id.btn_cancelLocation).setOnClickListener(view -> onBackPressed());
