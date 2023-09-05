@@ -1,14 +1,24 @@
 package com.example.notesapp.Model;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "credentials")
+@Entity(tableName = "credentials",
+        foreignKeys = @ForeignKey(entity = CredentialCategory.class,
+                parentColumns = "category_name",
+                childColumns = "category_name",
+                onDelete = ForeignKey.SET_DEFAULT))
 public class Credential {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String email;
+
+    @ColumnInfo(index = true, name = "category_name", defaultValue = "other")
+    private String categoryName;
     private String password;
+
     private String appName;
     private int icon;
 
@@ -58,5 +68,13 @@ public class Credential {
 
     public void setIcon(int icon) {
         this.icon = icon;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

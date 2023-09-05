@@ -9,6 +9,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,10 +25,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.notesapp.Model.Credential;
+import com.example.notesapp.Model.CredentialCategory;
 import com.example.notesapp.Model.Task;
 import com.example.notesapp.R;
 import com.example.notesapp.Repository.CredentialRepository;
 import com.example.notesapp.adapters.CredentialAdapter;
+import com.example.notesapp.adapters.CredentialCategoriesAdapter;
 import com.example.notesapp.adapters.TasksAdapter;
 import com.example.notesapp.databinding.ActivityPasswordManagerBinding;
 
@@ -51,7 +54,7 @@ public class PasswordManagerActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         credentialRepository = new CredentialRepository(this);
 
-        initializeFingerprintAuthentication();
+//        initializeFingerprintAuthentication();
         initializeCredentialsRecyclerView();
 
         binding.etSearchPasswords.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -70,7 +73,28 @@ public class PasswordManagerActivity extends AppCompatActivity {
                 }
                 return true;
             }
-    });
+        });
+
+
+        CredentialCategory category = new CredentialCategory("Apps");
+        CredentialCategory category1 = new CredentialCategory("Wallets");
+        CredentialCategory category2 = new CredentialCategory("Socials");
+        CredentialCategory category3 = new CredentialCategory("others");
+
+        category.setNumberOfApps(18);
+        category1.setNumberOfApps(6);
+        category2.setNumberOfApps(3);
+        category3.setNumberOfApps(1);
+
+        ArrayList<CredentialCategory> credentialCategories = new ArrayList<>();
+        credentialCategories.add(category);
+        credentialCategories.add(category1);
+        credentialCategories.add(category2);
+        credentialCategories.add(category3);
+
+        CredentialCategoriesAdapter adapter = new CredentialCategoriesAdapter(credentialCategories);
+        binding.credentialCategoriesRecyclerView.setAdapter(adapter);
+        binding.credentialCategoriesRecyclerView.setLayoutManager(new GridLayoutManager(this,2,VERTICAL,false));
     }
 
     void initializeItemHelperForCredentials(RecyclerView recyclerView, CredentialAdapter adapter){
@@ -188,7 +212,7 @@ public class PasswordManagerActivity extends AppCompatActivity {
                     Toast.makeText(this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
                 }
                 else{
-                    Credential credential = new Credential(email, password,appName,R.drawable.baseline_category_24);
+                    Credential credential = new Credential(email, password,appName,R.drawable.facebook_icon);
                     credentialRepository.insertCredential(credential);
                     credentialAdapter.updateData(credentialRepository.getAllCredentials());
                     addCredentialDialog.dismiss();
