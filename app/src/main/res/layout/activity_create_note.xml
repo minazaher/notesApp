@@ -94,7 +94,8 @@
                     android:includeFontPadding="false"
                     android:alpha="0.5"
                     android:layout_marginTop="@dimen/_2sdp"
-                    android:visibility="gone"
+                    android:visibility="visible"
+                    android:text="hello world"
                     android:textColor="@color/colorIcons"
                     android:textSize="@dimen/_10sdp" />
             </LinearLayout>
@@ -188,9 +189,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/_12ssp"
                 android:layout_marginTop="@dimen/_15sdp"
+                android:visibility="gone"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/imageNote"
@@ -201,7 +202,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:autoLink="web"
+                    android:textColor="@color/colorAccent"
                     android:fontFamily="@font/ubuntu_regular"
                     android:includeFontPadding="false"
                     android:textSize="@dimen/_13ssp" />

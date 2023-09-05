@@ -80,7 +80,7 @@ public class CategoryNotes extends Fragment {
         if(archived){
             return notesRepository.getArchivedNotes();
         }
-        if (favorite){
+        else if (favorite){
             return notesRepository.getFavoriteNotes();
         }
         else {

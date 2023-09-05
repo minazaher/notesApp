@@ -82,7 +82,8 @@ public class CreateNoteActivity extends AppCompatActivity{
         createNoteBinding = ActivityCreateNoteBinding.inflate(getLayoutInflater());
         setContentView(createNoteBinding.getRoot());
         categoryRepository = new CategoryRepository(this);
-        selectedNoteColor = "#deeae6";
+        selectedNoteColor = "#FF1D8E";
+        setSubtitleIndicatorColor();
 
         if (getIntent().getBooleanExtra("isViewOrUpdate", false)){
             alreadyAvailableNote = (Note) getIntent().getSerializableExtra("note");
@@ -193,6 +194,11 @@ public class CreateNoteActivity extends AppCompatActivity{
         if(alreadyAvailableNote.getWebLink() != null && !alreadyAvailableNote.getWebLink().trim().isEmpty()){
             createNoteBinding.layoutWebUrl.setVisibility(View.VISIBLE);
             createNoteBinding.textWebUrl.setText(alreadyAvailableNote.getWebLink());
+        }
+
+        if(alreadyAvailableNote.getWebLink() != null ){
+            createNoteBinding.tvNoteLocation.setVisibility(View.VISIBLE);
+            createNoteBinding.textWebUrl.setText(alreadyAvailableNote.getLocation());
         }
 
         if (alreadyAvailableNote.getArchived().equals(true)){
@@ -317,6 +323,7 @@ public class CreateNoteActivity extends AppCompatActivity{
                 .withAlphaEnabled(true)
                 .withTitle("Pick Your Note Color")
                 .withCornerRadius(5.0F)
+                .withTheme(R.style.ColorPickerDialog_Dark)
                 .withListener((dialog, color) -> {
                     selectedNoteColor = String.format("#%06X", (0xFFFFFF & color));
                     setSubtitleIndicatorColor();
@@ -352,7 +359,7 @@ public class CreateNoteActivity extends AppCompatActivity{
     }
 
     private void setColorPicker() {
-        String[] colors = {"#deeae6", "#FF1D8E", "#3a52Fc", "#F3DD5C", "#1AA7EC"};
+        String[] colors = {"#FF1D8E","#deeae6","#3a52Fc", "#F3DD5C", "#1AA7EC"};
         View[] views = {createNoteBinding.misc.viewColor1, createNoteBinding.misc.viewColor2, createNoteBinding.misc.viewColor3, createNoteBinding.misc.viewColor4, createNoteBinding.misc.viewColor5};
         ImageView[] images = {createNoteBinding.misc.imageColor1, createNoteBinding.misc.imageColor2, createNoteBinding.misc.imageColor3, createNoteBinding.misc.imageColor4, createNoteBinding.misc.imageColor5};
 
@@ -371,16 +378,16 @@ public class CreateNoteActivity extends AppCompatActivity{
 
             if(alreadyAvailableNote != null){
                 switch (alreadyAvailableNote.getColor()){
-                    case "#FDBE3B":
+                    case "#F3DD5C":
                         createNoteBinding.misc.viewColor2.performClick();
                         break;
-                    case "#3a52Fc":
+                    case "#deeae6":
                         createNoteBinding.misc.viewColor3.performClick();
                         break;
-                    case "#000000":
+                    case "#3a52Fc":
                         createNoteBinding.misc.viewColor4.performClick();
                         break;
-                    case "#FF48F2":
+                    case "#1AA7EC":
                         createNoteBinding.misc.viewColor5.performClick();
                         break;
                 }

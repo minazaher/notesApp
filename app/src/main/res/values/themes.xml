@@ -26,10 +26,14 @@
     </style>
 
 
-    <style name="ColorPickerDialog.Dark" parent="Theme.AppCompat.Light.Dialog">
-        <item name="colorAccent">@color/colorPrimary</item>
-        <item name="android:textColorPrimary">@color/colorPrimary</item>
-        <item name="android:textColorPrimaryInverse">@android:color/white</item>
+    <style name="ColorPickerDialog.Dark" parent="Theme.AppCompat.Dialog">
+    <item name="redColor">#FF5252</item>
+    <item name="greenColor">#FF5252</item>
+    <item name="blueColor">#536DFE</item>
+    <item name="neutralColor">#FFFFFF</item>
+        <item name="tabSelectedTextColor">@color/white</item>
+    <item name="backgroundColor">@color/colorPrimary</item>
+
 
     </style>
 

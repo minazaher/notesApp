@@ -83,6 +83,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(mainBinding.getRoot());
         roomBackup = new RoomBackup(MainActivity.this);
         initializeAnimation();
+        checkSpeechRecognition();
+        notesRepository = new NotesRepository(this);
 
         mainBinding.imageBackup.setOnClickListener(view -> {
             showSnackbar(mainBinding.getRoot(), "You want to backup your data?", "Confirm", view12 -> saveLocalBackup());
@@ -326,20 +328,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         List<String> categories = categoryRepository.getCategoriesNames();
         String categoryName = Objects.requireNonNull(item.getTitle()).toString();
+        System.out.println(categoryName);
+        System.out.println(item.getTitle());
         if (item.getItemId() == R.id.nav_archive) {
             navigationView.setCheckedItem(R.id.nav_archive);
             Intent intent = new Intent(MainActivity.this, CategoryNotesActivity.class);
             intent.putExtra("isArchived", true);
             startActivity(intent);
-        } else if (item.getItemId() == R.id.nav_todo) {
+        }
+        else if (item.getItemId() == R.id.nav_todo) {
             Intent intent = new Intent(MainActivity.this, ToDoListActivity.class);
             startActivity(intent);
         }
-        else if (item.getItemId() == R.id.nav_password_manager) {
+       else if (item.getItemId() == R.id.nav_password_manager) {
             Intent intent = new Intent(MainActivity.this, PasswordManagerActivity.class);
             startActivity(intent);
         }
-        if (item.getItemId() == R.id.nav_favorite) {
+        else if (item.getItemId() == R.id.nav_favorite) {
             navigationView.setCheckedItem(R.id.nav_archive);
             Intent intent = new Intent(MainActivity.this, CategoryNotesActivity.class);
             intent.putExtra("isFavorite", true);
@@ -348,7 +353,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else if (categories.contains(item.getTitle().toString())) {
             System.out.println("this is category : " + categoryName);
             Intent intent = new Intent(MainActivity.this, CategoryNotesActivity.class);
-            intent.putExtra("category", categoryName);
+            intent.putExtra("category", categoryName);System.out.println(notesRepository.getNotesByCategory(1));
             startActivity(intent);
         }
         drawerLayout.closeDrawer(GravityCompat.START);
@@ -362,6 +367,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
         if (activities.size() == 0) {
             mainBinding.fabASRNote.setVisibility(View.GONE);
-        } else mainBinding.fabASRNote.setVisibility(View.VISIBLE);
+        }
+        else mainBinding.fabASRNote.setVisibility(View.VISIBLE);
     }
 }

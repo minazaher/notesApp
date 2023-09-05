@@ -32,7 +32,7 @@ public class CategoryNotesActivity extends AppCompatActivity {
         {
             String categoryName = getIntent().getStringExtra("category");
             binding.tvCategoryName.setText(categoryName + " Notes");
-            Fragment categoryFragment  = CategoryNotes.newInstance(true, false,categoryName);
+            Fragment categoryFragment  = CategoryNotes.newInstance(false, false,categoryName);
             getSupportFragmentManager().beginTransaction().replace(R.id.category_fragment, categoryFragment).commit();
         }
 
