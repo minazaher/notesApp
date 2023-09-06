@@ -40,7 +40,7 @@ import java.util.concurrent.Executor;
 
 public class PasswordManagerActivity extends AppCompatActivity {
     ActivityPasswordManagerBinding binding;
-    AlertDialog addCredentialDialog ;
+    AlertDialog addCredentialDialog, iconPickerDialog ;
     CredentialRepository credentialRepository;
     BiometricPrompt biometricPrompt;
     BiometricPrompt.PromptInfo promptInfo;
@@ -218,9 +218,19 @@ public class PasswordManagerActivity extends AppCompatActivity {
                     addCredentialDialog.dismiss();
                 }
             });
+            view.findViewById(R.id.img_pick_app_icon).setOnClickListener(view13 -> showPickIconDialog());
             view.findViewById(R.id.textCancelCredential).setOnClickListener(view12 -> addCredentialDialog.dismiss());
             addCredentialDialog.show();
 
         }
+    }
+
+    void showPickIconDialog(){
+        AlertDialog.Builder  builder = new AlertDialog.Builder(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.layout_icon_picker,
+                (ViewGroup) findViewById(R.id.layout_addCredentialIconContainer));
+        builder.setView(view);
+        iconPickerDialog = builder.create();
+        iconPickerDialog.show();
     }
 }
