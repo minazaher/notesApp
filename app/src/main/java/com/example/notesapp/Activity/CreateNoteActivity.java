@@ -1,6 +1,5 @@
 package com.example.notesapp.Activity;
 
-import static com.example.notesapp.R.style.ColorPickerDialog_Dark;
 
 import android.Manifest;
 import android.content.ContentUris;
@@ -53,7 +52,6 @@ import java.util.Locale;
 
 
 import me.jfenn.colorpickerdialog.dialogs.ColorPickerDialog;
-import me.jfenn.colorpickerdialog.interfaces.OnColorPickedListener;
 
 public class CreateNoteActivity extends AppCompatActivity{
     private static final String NOTE_TITLE_EMPTY = "Note title cannot be empty!";
@@ -62,10 +60,8 @@ public class CreateNoteActivity extends AppCompatActivity{
     private static final String NOTE_VALID = "";
     private static final int REQUEST_CODE_STORAGE_PERMISSION = 1;
 
-    ActivityCreateNoteBinding createNoteBinding;
-
+    static ActivityCreateNoteBinding createNoteBinding;
     public ActivityResultLauncher<String> selectPhoto;
-
     String noteTitle, noteText, noteSubtitle;
     private String selectedNoteColor;
     Boolean isArchived = false ;
@@ -86,12 +82,11 @@ public class CreateNoteActivity extends AppCompatActivity{
         createNoteBinding = ActivityCreateNoteBinding.inflate(getLayoutInflater());
         setContentView(createNoteBinding.getRoot());
         categoryRepository = new CategoryRepository(this);
-        selectedNoteColor = "#deeae6";
-
+        selectedNoteColor = "#FF1D8E";
+        setSubtitleIndicatorColor();
 
         if (getIntent().getBooleanExtra("isViewOrUpdate", false)){
             alreadyAvailableNote = (Note) getIntent().getSerializableExtra("note");
-            createNoteBinding.misc.layoutAddToArchive.setVisibility(View.VISIBLE);
             createNoteBinding.misc.layoutDeleteNote.setVisibility(View.VISIBLE);
             setViewOrUpdateNote();
         }
@@ -104,7 +99,6 @@ public class CreateNoteActivity extends AppCompatActivity{
         });
 
         createNoteBinding.imageBack.setOnClickListener(view -> onBackPressed());
-        createNoteBinding.misc.layoutAddToArchive.setOnClickListener(view -> {isArchived = !alreadyAvailableNote.getArchived();});
         initializeMisc();
 
         createNoteBinding.textDateTime.setText(
@@ -139,6 +133,8 @@ public class CreateNoteActivity extends AppCompatActivity{
                 Toast.makeText(CreateNoteActivity.this, "Failed! Try Again Later Please", Toast.LENGTH_SHORT).show();
             }
         });
+        initializeFavButton(isFavourite);
+        initializeArchiveButton(isArchived);
         initializeSpinner();
 
     }
@@ -155,8 +151,13 @@ public class CreateNoteActivity extends AppCompatActivity{
             else
                 showTurnLocationOnDialog();
         });
-
     }
+
+    public static void setLocationText(String location){
+        createNoteBinding.tvNoteLocation.setVisibility(View.VISIBLE);
+        createNoteBinding.tvNoteLocation.setText(selectedLocation);
+    }
+
     private boolean isLocationEnabled() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -194,11 +195,63 @@ public class CreateNoteActivity extends AppCompatActivity{
             createNoteBinding.layoutWebUrl.setVisibility(View.VISIBLE);
             createNoteBinding.textWebUrl.setText(alreadyAvailableNote.getWebLink());
         }
-        if (alreadyAvailableNote.getArchived().equals(true))
+
+        if(alreadyAvailableNote.getWebLink() != null ){
+            createNoteBinding.tvNoteLocation.setVisibility(View.VISIBLE);
+            createNoteBinding.textWebUrl.setText(alreadyAvailableNote.getLocation());
+        }
+
+        if (alreadyAvailableNote.getArchived().equals(true)){
             createNoteBinding.misc.layoutAddToArchive.setVisibility(View.GONE);
+            isArchived = true;
+        }
 
+        if (alreadyAvailableNote.getFavourite().equals(true)){
+            isFavourite = true;
+        }
     }
+    void initializeArchiveButton(boolean archived) {
+        if(archived){
+            createNoteBinding.misc.layoutDeleteFromArchive.setVisibility(View.VISIBLE);
+            createNoteBinding.misc.layoutAddToArchive.setVisibility(View.GONE);
+            createNoteBinding.misc.layoutDeleteFromArchive.setOnClickListener(view -> {
+                isArchived = false;
+                initializeArchiveButton(isArchived);
 
+            });
+        }
+        else
+        {
+            createNoteBinding.misc.layoutAddToArchive.setVisibility(View.VISIBLE);
+            createNoteBinding.misc.layoutDeleteFromArchive.setVisibility(View.GONE);
+            createNoteBinding.misc.layoutAddToArchive.setOnClickListener(view -> {
+                isArchived = true;
+                initializeArchiveButton(isArchived);
+
+            });
+        }
+    }
+    void initializeFavButton(boolean fav) {
+       if(fav){
+           createNoteBinding.misc.layoutDeleteFromFavorite.setVisibility(View.VISIBLE);
+           createNoteBinding.misc.layoutAddToFavorite.setVisibility(View.GONE);
+           createNoteBinding.misc.layoutDeleteFromFavorite.setOnClickListener(view -> {
+               isFavourite = false;
+               initializeFavButton(isFavourite);
+
+           });
+       }
+       else
+       {
+           createNoteBinding.misc.layoutAddToFavorite.setVisibility(View.VISIBLE);
+           createNoteBinding.misc.layoutDeleteFromFavorite.setVisibility(View.GONE);
+           createNoteBinding.misc.layoutAddToFavorite.setOnClickListener(view -> {
+               isFavourite = true;
+               initializeFavButton(isFavourite);
+
+           });
+       }
+    }
     private String getNoteStatus() {
         noteTitle = createNoteBinding.etNoteTitle.getText().toString();
         noteText = createNoteBinding.etNote.getText().toString();
@@ -265,23 +318,18 @@ public class CreateNoteActivity extends AppCompatActivity{
     }
 
     private void initializeColorPicker(){
-        createNoteBinding.misc.tvPickColor.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new ColorPickerDialog()
-                        .withColor(Color.RED)
-                        .withAlphaEnabled(true)
-                        .withTitle("Pick Your Note Color")
-                        .withCornerRadius(5.0F)
-                        .withTheme(ColorPickerDialog_Dark)
-                        .withListener((dialog, color) -> {
-                            selectedNoteColor = String.format("#%06X", (0xFFFFFF & color));
-                            setSubtitleIndicatorColor();
-                            Toast.makeText(CreateNoteActivity.this, "Color Picked!", Toast.LENGTH_SHORT).show();
-                        })
-                        .show(getSupportFragmentManager(), "colorPicker");
-            }
-        });
+        createNoteBinding.misc.tvPickColor.setOnClickListener(view -> new ColorPickerDialog()
+                .withColor(Color.RED)
+                .withAlphaEnabled(true)
+                .withTitle("Pick Your Note Color")
+                .withCornerRadius(5.0F)
+                .withTheme(R.style.ColorPickerDialog_Dark)
+                .withListener((dialog, color) -> {
+                    selectedNoteColor = String.format("#%06X", (0xFFFFFF & color));
+                    setSubtitleIndicatorColor();
+                    Toast.makeText(CreateNoteActivity.this, "Color Picked!", Toast.LENGTH_SHORT).show();
+                })
+                .show(getSupportFragmentManager(), "colorPicker"));
     }
     public void selectImage() {
         selectPhoto.launch("image/*");
@@ -311,7 +359,7 @@ public class CreateNoteActivity extends AppCompatActivity{
     }
 
     private void setColorPicker() {
-        String[] colors = {"#deeae6", "#FF1D8E", "#3a52Fc", "#F3DD5C", "#1AA7EC"};
+        String[] colors = {"#FF1D8E","#deeae6","#3a52Fc", "#F3DD5C", "#1AA7EC"};
         View[] views = {createNoteBinding.misc.viewColor1, createNoteBinding.misc.viewColor2, createNoteBinding.misc.viewColor3, createNoteBinding.misc.viewColor4, createNoteBinding.misc.viewColor5};
         ImageView[] images = {createNoteBinding.misc.imageColor1, createNoteBinding.misc.imageColor2, createNoteBinding.misc.imageColor3, createNoteBinding.misc.imageColor4, createNoteBinding.misc.imageColor5};
 
@@ -330,16 +378,16 @@ public class CreateNoteActivity extends AppCompatActivity{
 
             if(alreadyAvailableNote != null){
                 switch (alreadyAvailableNote.getColor()){
-                    case "#FDBE3B":
+                    case "#F3DD5C":
                         createNoteBinding.misc.viewColor2.performClick();
                         break;
-                    case "#3a52Fc":
+                    case "#deeae6":
                         createNoteBinding.misc.viewColor3.performClick();
                         break;
-                    case "#000000":
+                    case "#3a52Fc":
                         createNoteBinding.misc.viewColor4.performClick();
                         break;
-                    case "#FF48F2":
+                    case "#1AA7EC":
                         createNoteBinding.misc.viewColor5.performClick();
                         break;
                 }

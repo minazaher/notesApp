@@ -6,8 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
     tools:context=".Activity.ToDoListActivity">
-
-
     <TextView
         android:id="@+id/tv_myTasks"
         android:layout_width="match_parent"
@@ -41,7 +39,7 @@
             app:tint="@color/colorSearchIcon"/>
 
         <androidx.appcompat.widget.SearchView
-            android:id="@+id/et_search"
+            android:id="@+id/et_searchTodoList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/_5sdp"

@@ -6,11 +6,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorPrimary"
     tools:context=".Fragments.CategoryNotes">
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/categoryNotesRecyclerView"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:nestedScrollingEnabled="true"
-            android:layout_height="match_parent"
             android:layout_marginHorizontal="@dimen/_2sdp"
             android:clipChildren="false"
             android:paddingStart="0dp"

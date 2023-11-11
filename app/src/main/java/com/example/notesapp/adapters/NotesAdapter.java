@@ -16,6 +16,8 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -38,15 +40,15 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.Viewholder> {
+public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.Viewholder> implements Filterable {
 
     List<Note> notes;
     NotesListener notesListener;
     Timer timer ;
+    private List<Note> orig;
     List<Note> noteSource;
 
     public NotesAdapter(List<Note> notes, NotesListener notesListener) {
-
         this.notes = notes;
         this.notesListener = notesListener;
         this.noteSource = notes;
@@ -79,6 +81,37 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.Viewholder> 
     public int getItemViewType(int position) {
         return position;
     }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                final FilterResults oReturn = new FilterResults();
+                final List<Note> results = new ArrayList<Note>();
+                if (orig == null)
+                    orig = notes;
+                if (constraint != null) {
+                    if (orig != null & orig.size() > 0) {
+                        for (final Note g : orig) {
+                            if (noteContains(g,constraint.toString()))
+                                results.add(g);
+                        }
+                    }
+                    oReturn.values = results;
+                }
+                return oReturn;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                notes = (ArrayList<Note>) results.values;
+                notifyDataSetChanged();
+
+            }
+        };
+    }
+
 
     class Viewholder extends RecyclerView.ViewHolder{
         TextView title, subtitle, date;
@@ -143,5 +176,24 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.Viewholder> 
                 note.getSubtitle().toLowerCase().contains(word.toLowerCase()) ||
                 note.getNoteText().toLowerCase().contains(word.toLowerCase());
     }
+
+    public void filter(String query) {
+        List<Note> filteredItems = new ArrayList<>();
+
+        if (query.isEmpty()) {
+            filteredItems.addAll(notes);
+        } else {
+            for (Note item : notes) {
+                if (noteContains(item,query)) {
+                    filteredItems.add(item);
+                }
+            }
+        }
+
+        notes.clear();
+        notes.addAll(filteredItems);
+        notifyDataSetChanged();
+    }
+
 
 }

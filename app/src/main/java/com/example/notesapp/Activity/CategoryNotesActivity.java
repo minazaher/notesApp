@@ -19,16 +19,20 @@ public class CategoryNotesActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         boolean isArchived = getIntent().getBooleanExtra("isArchived", false);
+        boolean isFavorite = getIntent().getBooleanExtra("isFavorite", false);
         if(isArchived){
             binding.tvCategoryName.setText("Archived Notes");
-            Fragment categoryFragment  = CategoryNotes.newInstance(isArchived,"none");
+            Fragment categoryFragment  = CategoryNotes.newInstance(false,isArchived,"none");
             getSupportFragmentManager().beginTransaction().replace(R.id.category_fragment, categoryFragment).commit();
-        }
-        else
+        } else if (isFavorite) {
+            binding.tvCategoryName.setText("Favorite Notes");
+            Fragment categoryFragment  = CategoryNotes.newInstance(isFavorite,false,"none");
+            getSupportFragmentManager().beginTransaction().replace(R.id.category_fragment, categoryFragment).commit();
+        } else
         {
             String categoryName = getIntent().getStringExtra("category");
             binding.tvCategoryName.setText(categoryName + " Notes");
-            Fragment categoryFragment  = CategoryNotes.newInstance(false,categoryName);
+            Fragment categoryFragment  = CategoryNotes.newInstance(false, false,categoryName);
             getSupportFragmentManager().beginTransaction().replace(R.id.category_fragment, categoryFragment).commit();
         }
 

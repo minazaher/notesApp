@@ -1,10 +1,12 @@
 package com.example.notesapp.Activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -38,19 +40,19 @@ public class CreateTaskActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_task);
         binding = ActivityCreateTaskBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        String creationDate = new SimpleDateFormat("EEEE, dd MMMM, yyyy  HH:mm a", Locale.getDefault())
-                .format(new Date());
+        String creationDate = new SimpleDateFormat("EEEE, dd MMMM, yyyy  HH:mm a", Locale.getDefault()).format(new Date());
 
         binding.textTaskDateTime.setText(creationDate);
         initializeSpinner();
         binding.etPickDueDate.setOnClickListener(view -> showPickDateDialog());
         binding.imageSaveTask.setOnClickListener(view -> {
             saveTask();
-            Toast.makeText(CreateTaskActivity.this, "Saved!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(CreateTaskActivity.this, "Task Saved!", Toast.LENGTH_SHORT).show();
         });
+
+        binding.imageBackTask.setOnClickListener(view -> onBackPressed());
     }
 
     private void initializeSpinner(){
@@ -81,11 +83,13 @@ public class CreateTaskActivity extends AppCompatActivity {
                             showPickTimeDialog();
                         },
                           2022,8,25);
+
         dialog.show();
     }
 
     void showPickTimeDialog(){
-        TimePickerDialog timePickerDialog = new TimePickerDialog(CreateTaskActivity.this,
+        TimePickerDialog timePickerDialog = new TimePickerDialog(
+                CreateTaskActivity.this,
                 (view1, hourOfDay, minute) -> {
                     String time = hourOfDay + ":" + minute;
                     taskDue.setHour(time);

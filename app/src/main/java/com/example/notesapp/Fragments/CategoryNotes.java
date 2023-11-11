@@ -28,7 +28,7 @@ public class CategoryNotes extends Fragment {
     NotesRepository notesRepository;
     CategoryRepository categoryRepository ;
     FragmentCategoryNotesBinding fragment;
-    boolean archived ;
+    boolean archived, favorite ;
     String categoryName;
 
     public CategoryNotes() {
@@ -36,10 +36,11 @@ public class CategoryNotes extends Fragment {
         categoryRepository = new CategoryRepository(getContext());
     }
 
-    public static CategoryNotes newInstance(boolean archived, String categoryName) {
+    public static CategoryNotes newInstance(boolean favorite, boolean archived, String categoryName) {
         CategoryNotes fragment = new CategoryNotes();
         Bundle args = new Bundle();
         args.putBoolean("isArchived", archived);
+        args.putBoolean("isFavorite", favorite);
         args.putString("categoryName", categoryName);
         fragment.setArguments(args);
         return fragment;
@@ -50,6 +51,7 @@ public class CategoryNotes extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             archived = getArguments().getBoolean("isArchived");
+            favorite = getArguments().getBoolean("isFavorite");
             categoryName = getArguments().getString("categoryName");
         }
 
@@ -77,6 +79,9 @@ public class CategoryNotes extends Fragment {
     ArrayList<Note> getData(){
         if(archived){
             return notesRepository.getArchivedNotes();
+        }
+        else if (favorite){
+            return notesRepository.getFavoriteNotes();
         }
         else {
             int id = categoryRepository.getCategoryIdByName(categoryName);

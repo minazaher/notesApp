@@ -33,6 +33,7 @@ public class MapFragment extends Fragment {
     OnLocationChangedListener locationChangedListener;
     FloatingActionButton getMyLocation;
     GoogleMap myGoogleMap;
+    public static String NOTE_LOCATION = "";
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

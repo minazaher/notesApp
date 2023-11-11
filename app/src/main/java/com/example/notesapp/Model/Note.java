@@ -1,5 +1,6 @@
 package com.example.notesapp.Model;
 
+import android.graphics.Color;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
@@ -8,6 +9,8 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+
+import com.example.notesapp.R;
 
 import java.io.Serializable;
 
@@ -43,19 +46,15 @@ public class Note implements Serializable {
 
     public Note() {
     }
-@Ignore
-    public Note(String noteText) {
+    public Note(String noteText, String dateTime) {
         this.noteText = noteText;
+        this.dateTime = dateTime;
         title = "NONE";
-        dateTime = "NONE";
         subtitle = "NONE";
         categoryId = 0;
-        imagePath = "NONE";
-        color = "NONE";
+        color = "#deeae6";
         isArchived = false;
         isFavourite = false;
-        webLink = "NONE";
-        location = "NONE";
     }
 
     public int getId() {
