@@ -53,6 +53,7 @@
             app:layout_constraintTop_toBottomOf="@id/imageAddCredential"
             android:orientation="horizontal">
             <ImageView
+                android:id="@+id/pick_instagram"
                 android:layout_width="@dimen/_50sdp"
                 android:layout_height="@dimen/_50sdp"
                 android:scaleType="fitXY"
@@ -63,6 +64,7 @@
                 app:layout_constraintBottom_toBottomOf="@id/et_enterAppName"/>
 
             <ImageView
+                android:id="@+id/pick_facebook"
                 android:layout_width="@dimen/_50sdp"
                 android:layout_height="@dimen/_50sdp"
                 android:scaleType="fitXY"
@@ -82,16 +84,18 @@
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/pick_X"
                 android:layout_width="@dimen/_50sdp"
                 android:layout_height="@dimen/_50sdp"
                 android:scaleType="fitXY"
                 android:src="@drawable/icons8_twitter"
                 android:layout_marginEnd="@dimen/_16ssp" />
             <ImageView
+                android:id="@+id/pick_default"
                 android:layout_width="@dimen/_50sdp"
                 android:layout_height="@dimen/_50sdp"
                 android:scaleType="fitXY"
-                android:src="@drawable/baseline_library_add_24"
+                android:src="@drawable/baseline_category_24"
                 app:tint="@color/colorIcons"
                 android:layout_marginEnd="@dimen/_16ssp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -103,7 +107,7 @@
 
 
     <TextView
-        android:id="@+id/textAddCredential"
+        android:id="@+id/textAddIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/_8sdp"
@@ -119,7 +123,7 @@
         app:layout_constraintTop_toBottomOf="@id/icons_picker"/>
 
     <TextView
-        android:id="@+id/textCancelCredential"
+        android:id="@+id/textCancelIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/_8sdp"
@@ -130,7 +134,7 @@
         android:text="@string/cancel"
         android:textColor="@color/colorAccent"
         android:textSize="@dimen/_13ssp"
-        app:layout_constraintEnd_toStartOf="@id/textAddCredential"
+        app:layout_constraintEnd_toStartOf="@id/textAddIcon"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/icons_picker"/>
 

@@ -16,12 +16,15 @@ public class CredentialCategory {
     @ColumnInfo(name = "no_of_apps")
     private int numberOfApps;
 
+    private int categoryIcon;
+
     public CredentialCategory() {
 
     }
 
-    public CredentialCategory(@NonNull String categoryName) {
+    public CredentialCategory(@NonNull String categoryName, int categoryIcon) {
         this.categoryName = categoryName;
+        this.categoryIcon = categoryIcon;
         numberOfApps = 0;
     }
 
@@ -41,5 +44,13 @@ public class CredentialCategory {
 
     public void setNumberOfApps(int numberOfApps) {
         this.numberOfApps = numberOfApps;
+    }
+
+    public int getCategoryIcon() {
+        return categoryIcon;
+    }
+
+    public void setCategoryIcon(int categoryIcon) {
+        this.categoryIcon = categoryIcon;
     }
 }

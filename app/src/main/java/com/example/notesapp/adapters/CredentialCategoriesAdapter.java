@@ -44,6 +44,12 @@ public class CredentialCategoriesAdapter extends RecyclerView.Adapter<Credential
         return categories.size();
     }
 
+    public void updateData(List<CredentialCategory> allCredentialCategory) {
+        this.categories = allCredentialCategory;
+        notifyDataSetChanged();
+
+    }
+
     public class Viewholder extends RecyclerView.ViewHolder {
         TextView name, noOFApps;
         ImageView icon;
@@ -58,7 +64,7 @@ public class CredentialCategoriesAdapter extends RecyclerView.Adapter<Credential
             name.setText(category.getCategoryName());
             String password  = String.valueOf(category.getNumberOfApps());
             noOFApps.setText(MessageFormat.format("{0} Passwords", password));
-            icon.setImageResource(R.drawable.baseline_groups_24);
+            icon.setImageResource(category.getCategoryIcon());
         }
     }
 }

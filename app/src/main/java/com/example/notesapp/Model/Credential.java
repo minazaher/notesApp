@@ -14,21 +14,21 @@ public class Credential {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String email;
-
-    @ColumnInfo(index = true, name = "category_name", defaultValue = "other")
+    @ColumnInfo(index = true, name = "category_name", defaultValue = "Others")
     private String categoryName;
     private String password;
 
     private String appName;
     private int icon;
 
-    public Credential(String email, String password, String appName, int icon) {
+
+    public Credential(String email, String categoryName, String password, String appName, int icon) {
         this.email = email;
+        this.categoryName = categoryName;
         this.password = password;
         this.appName = appName;
         this.icon = icon;
     }
-
 
     public int getId() {
         return id;

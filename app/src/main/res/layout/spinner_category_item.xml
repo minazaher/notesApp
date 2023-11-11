@@ -8,6 +8,7 @@
     android:textSize="@dimen/_15ssp"
     android:gravity="center_vertical"
     android:layout_marginStart="@dimen/_15sdp"
+    android:text="Hello "
     android:background="@color/colorPrimary">
 
 </TextView>

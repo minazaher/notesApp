@@ -12,18 +12,18 @@ import java.util.ArrayList;
 
 public class CredentialRepository {
     private final WeakReference<Context> mContextRef;
+    private final CredentialCategoryRepository credentialCategoryRepository;
 
     public CredentialRepository(Context context) {
         mContextRef = new WeakReference<>(context);
+        credentialCategoryRepository = new CredentialCategoryRepository(mContextRef.get());
     }
-    public void insertCredential(Credential credential){
+    public void insertCredential(Credential credential) throws InterruptedException {
         Thread insertCred = new Thread(() -> NotesDatabase.getInstance(mContextRef.get()).credentialDao().insertCredential(credential));
         insertCred.start();
-        try {
-            insertCred.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+
+        insertCred.join();
+        credentialCategoryRepository.increaseCategoryNumberOfApps(credential.getCategoryName());
     }
 
     public ArrayList<Credential> getAllCredentials(){
@@ -39,7 +39,7 @@ public class CredentialRepository {
         return allCredentials;
     }
 
-    public void removeCredential(Credential credential) {
+    public void removeCredential(Credential credential) throws InterruptedException {
         Thread insertCred = new Thread(() ->
                 NotesDatabase.getInstance(mContextRef.get()).credentialDao().deleteCredential(credential));
         insertCred.start();
@@ -48,5 +48,7 @@ public class CredentialRepository {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        credentialCategoryRepository.decreaseCategoryNumberOfApps(credential.getCategoryName());
+
     }
 }

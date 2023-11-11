@@ -95,7 +95,7 @@
                     android:alpha="0.5"
                     android:layout_marginTop="@dimen/_2sdp"
                     android:visibility="visible"
-                    android:text="hello world"
+                    android:text="@null"
                     android:textColor="@color/colorIcons"
                     android:textSize="@dimen/_10sdp" />
             </LinearLayout>

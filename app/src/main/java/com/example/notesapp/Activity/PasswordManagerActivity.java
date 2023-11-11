@@ -13,39 +13,52 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.notesapp.Listeners.OnIconPickedListener;
 import com.example.notesapp.Model.Credential;
 import com.example.notesapp.Model.CredentialCategory;
-import com.example.notesapp.Model.Task;
 import com.example.notesapp.R;
+import com.example.notesapp.Repository.CredentialCategoryRepository;
 import com.example.notesapp.Repository.CredentialRepository;
 import com.example.notesapp.adapters.CredentialAdapter;
 import com.example.notesapp.adapters.CredentialCategoriesAdapter;
-import com.example.notesapp.adapters.TasksAdapter;
 import com.example.notesapp.databinding.ActivityPasswordManagerBinding;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PasswordManagerActivity extends AppCompatActivity {
     ActivityPasswordManagerBinding binding;
-    AlertDialog addCredentialDialog, iconPickerDialog ;
     CredentialRepository credentialRepository;
     BiometricPrompt biometricPrompt;
     BiometricPrompt.PromptInfo promptInfo;
     CredentialAdapter credentialAdapter;
     List<Credential> credentialList;
+    CredentialCategoriesAdapter credentialCategoriesAdapter;
+    CredentialCategoryRepository credentialCategoryRepository;
+    int appIcon;
     @SuppressLint("SwitchIntDef")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,19 +66,30 @@ public class PasswordManagerActivity extends AppCompatActivity {
         binding = ActivityPasswordManagerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         credentialRepository = new CredentialRepository(this);
+        credentialCategoryRepository = new CredentialCategoryRepository(this);
+        appIcon = R.drawable.baseline_category_24;
 
-//        initializeFingerprintAuthentication();
+        binding.layoutPasswordManager.setOnRefreshListener(() -> {
+            refreshData();
+            binding.layoutPasswordManager.setRefreshing(false);
+        });
+
+        initializeFingerprintAuthentication();
         initializeCredentialsRecyclerView();
+        initializeCategoriesRecyclerView();
 
         binding.etSearchPasswords.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
             @Override
             public boolean onQueryTextSubmit(String query) {
+                binding.layoutCredentialsCategories.setVisibility(GONE);
                 credentialAdapter.getFilter().filter(query);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                binding.layoutCredentialsCategories.setVisibility(GONE);
                 if (TextUtils.isEmpty ( newText ) ) {
                     credentialAdapter.getFilter().filter("");
                 } else {
@@ -75,28 +99,33 @@ public class PasswordManagerActivity extends AppCompatActivity {
             }
         });
 
-
-        CredentialCategory category = new CredentialCategory("Apps");
-        CredentialCategory category1 = new CredentialCategory("Wallets");
-        CredentialCategory category2 = new CredentialCategory("Socials");
-        CredentialCategory category3 = new CredentialCategory("others");
-
-        category.setNumberOfApps(18);
-        category1.setNumberOfApps(6);
-        category2.setNumberOfApps(3);
-        category3.setNumberOfApps(1);
-
-        ArrayList<CredentialCategory> credentialCategories = new ArrayList<>();
-        credentialCategories.add(category);
-        credentialCategories.add(category1);
-        credentialCategories.add(category2);
-        credentialCategories.add(category3);
-
-        CredentialCategoriesAdapter adapter = new CredentialCategoriesAdapter(credentialCategories);
-        binding.credentialCategoriesRecyclerView.setAdapter(adapter);
-        binding.credentialCategoriesRecyclerView.setLayoutManager(new GridLayoutManager(this,2,VERTICAL,false));
     }
 
+    private void refreshData() {
+        credentialAdapter.updateData(credentialRepository.getAllCredentials());
+        credentialCategoriesAdapter.updateData(credentialCategoryRepository.getAllCredentialCategory());
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(binding.layoutCredentialsCategories.getVisibility() == GONE){
+            binding.layoutCredentialsCategories.setVisibility(VISIBLE);
+        }
+        else
+            super.onBackPressed();
+    }
+
+    void initializeCategoriesRecyclerView(){
+        ArrayList<CredentialCategory> credentialCategories = new ArrayList<>(credentialCategoryRepository.getAllCredentialCategory());
+
+        if(credentialCategories.isEmpty()){
+            credentialCategoryRepository.insertDefaultCategories();
+        }
+        credentialCategoriesAdapter = new CredentialCategoriesAdapter(credentialCategories);
+        binding.credentialCategoriesRecyclerView.setAdapter(credentialCategoriesAdapter);
+        binding.credentialCategoriesRecyclerView.setLayoutManager(new GridLayoutManager(this,2,VERTICAL,false));
+    }
     void initializeItemHelperForCredentials(RecyclerView recyclerView, CredentialAdapter adapter){
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback =
                 new ItemTouchHelper.SimpleCallback(0,
@@ -112,8 +141,13 @@ public class PasswordManagerActivity extends AppCompatActivity {
                                          int swipeDir) {
                         int position = viewHolder.getAdapterPosition();
                         Credential credential = adapter.getCredentialList().get(position);
-                        credentialRepository.removeCredential(credential);
-                        adapter.updateData((ArrayList<Credential>) credentialRepository.getAllCredentials());
+                        try {
+                            credentialRepository.removeCredential(credential);
+                        } catch (InterruptedException e) {
+                            Toast.makeText(PasswordManagerActivity.this, "Cannot remove it!", Toast.LENGTH_SHORT).show();
+                            throw new RuntimeException(e);
+                        }
+                        refreshData();
                     }
                 };
 
@@ -127,7 +161,7 @@ public class PasswordManagerActivity extends AppCompatActivity {
         binding.credentialsRecyclerView.setAdapter(credentialAdapter);
         binding.credentialsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,
                 false));
-        binding.fabAddCredential.setOnClickListener(view -> showAddCredentialDialog());
+        binding.fabAddCredential.setOnClickListener(view -> startActivity(new Intent(PasswordManagerActivity.this, CreateCredentialActivity.class)));
         binding.credentialsRecyclerView.addOnScrollListener(new OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -188,49 +222,5 @@ public class PasswordManagerActivity extends AppCompatActivity {
 
     }
 
-    private void showAddCredentialDialog(){
-        if(addCredentialDialog == null){
-            AlertDialog.Builder  builder = new AlertDialog.Builder(this);
-            View view = LayoutInflater.from(this).inflate(R.layout.layout_add_credential,
-                    (ViewGroup) findViewById(R.id.layout_addCredentialContainer));
-            builder.setView(view);
-            addCredentialDialog = builder.create();
-            if(addCredentialDialog.getWindow() != null){
-                addCredentialDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
-            }
-            EditText et_appName = view.findViewById(R.id.et_enterAppName);
-            EditText et_email = view.findViewById(R.id.et_enterEmail);
-            EditText et_password = view.findViewById(R.id.et_enterPassword);
 
-            et_appName.requestFocus();
-
-            view.findViewById(R.id.textAddCredential).setOnClickListener(view1 -> {
-                String appName = et_appName.getText().toString();
-                String email = et_email.getText().toString();
-                String password = et_password.getText().toString();
-                if(appName.trim().isEmpty() || email.trim().isEmpty() || password.trim().isEmpty()){
-                    Toast.makeText(this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
-                }
-                else{
-                    Credential credential = new Credential(email, password,appName,R.drawable.facebook_icon);
-                    credentialRepository.insertCredential(credential);
-                    credentialAdapter.updateData(credentialRepository.getAllCredentials());
-                    addCredentialDialog.dismiss();
-                }
-            });
-            view.findViewById(R.id.img_pick_app_icon).setOnClickListener(view13 -> showPickIconDialog());
-            view.findViewById(R.id.textCancelCredential).setOnClickListener(view12 -> addCredentialDialog.dismiss());
-            addCredentialDialog.show();
-
-        }
-    }
-
-    void showPickIconDialog(){
-        AlertDialog.Builder  builder = new AlertDialog.Builder(this);
-        View view = LayoutInflater.from(this).inflate(R.layout.layout_icon_picker,
-                (ViewGroup) findViewById(R.id.layout_addCredentialIconContainer));
-        builder.setView(view);
-        iconPickerDialog = builder.create();
-        iconPickerDialog.show();
-    }
 }

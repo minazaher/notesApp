@@ -37,10 +37,7 @@
             android:id="@+id/nav_favorite"
             android:icon="@drawable/baseline_favorite_24"
             android:title="@string/favorite"/>
-        <item
-            android:id="@+id/nav_gift"
-            android:icon="@drawable/baseline_card_giftcard_24"
-            android:title="@string/a_message"/>
+
     </menu>
 </item>
 
