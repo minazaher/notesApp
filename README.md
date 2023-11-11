@@ -32,7 +32,7 @@ Notey is a mobile notes application built to provide a seamless and secure way t
 ### Installation
 
 1. Clone the repository:
-   ``bash
+   ``
   https://github.com/minazaher/notesApp/tree/password
    ``
 
