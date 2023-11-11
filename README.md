@@ -33,7 +33,7 @@ Notey is a mobile notes application built to provide a seamless and secure way t
 
 1. Clone the repository:
    ```bash
-   [git clone https://github.com/your-username/notey.git](https://github.com/minazaher/notesApp/tree/password)
+   [(https://github.com/minazaher/notesApp/tree/password)]
    ```
 
 2. Open the project in Android Studio.
@@ -42,11 +42,6 @@ Notey is a mobile notes application built to provide a seamless and secure way t
 
 4. Build and run the application on your Android device or emulator.
 
-## Usage
-
-- Open the Notey app on your Android device.
-- Explore the intuitive user interface to create, edit, and manage your notes.
-- Take advantage of speech recognition, secure storage, and biometric authentication features.
 
 ## Technologies Used
 
